@@ -1,0 +1,14 @@
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/dist-tanitim
+src/Sezgi.Sunucu/wwwroot
+src/Sezgi.Sunucu/veri
+src/Sezgi.Sunucu/indirmeler
+masaustu
+tests
+cikti
+docs
+.git
+.github

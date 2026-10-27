@@ -1,0 +1,21 @@
+# Sezgi sunucusunu systemd hizmeti olarak çalıştırmak için:
+#   sudo cp -r Sezgi-Sunucu-linux-x64 /opt/sezgi
+#   sudo useradd --system --home /opt/sezgi sezgi && sudo chown -R sezgi /opt/sezgi
+#   sudo cp /opt/sezgi/sezgi.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now sezgi
+[Unit]
+Description=Sezgi sinif duygu ve dikkat analitigi sunucusu
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=sezgi
+WorkingDirectory=/opt/sezgi
+ExecStart=/opt/sezgi/Sezgi.Sunucu
+Environment=Sezgi__AcilistaTarayiciAc=false
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

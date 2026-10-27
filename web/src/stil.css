@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  /* Zemin: mor-çivit bir gece; üzerine duygu tayfı oturur. */
+  --color-gece: #1a1535;
+  --color-gece-2: #211b44;
+  --color-gece-3: #2b2457;
+  --color-gece-4: #352d68;
+  --color-cizgi: #3a3270;
+  --color-metin: #f1eeff;
+  --color-soluk: #aaa4d1;
+  --color-silik: #7770a6;
+  --color-gunes: #ffc94a;
+  --color-gunes-koyu: #f0b429;
+
+  --color-d-notr: #9aa6c8;
+  --color-d-mutlu: #ffc94a;
+  --color-d-saskin: #ff7ad9;
+  --color-d-uzgun: #5aa9ff;
+  --color-d-ofkeli: #ff6b5e;
+  --color-d-korku: #a784ff;
+  --color-d-igrenme: #7bdb8a;
+
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-kart: 1.25rem;
+  --radius-pill: 999px;
+
+  --animate-nefes: nefes 5.5s ease-in-out infinite;
+  --animate-suzul: suzul 7s ease-in-out infinite;
+  --animate-nabiz: nabiz 1.8s ease-out infinite;
+
+  @keyframes nefes {
+    0%, 100% { transform: scale(1, 1); }
+    50% { transform: scale(1.025, 0.985); }
+  }
+  @keyframes suzul {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes nabiz {
+    0% { box-shadow: 0 0 0 0 var(--nabiz-renk, rgb(255 107 94 / 0.55)); }
+    100% { box-shadow: 0 0 0 14px rgb(0 0 0 / 0); }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-gece text-metin font-sans antialiased;
+    font-feature-settings: "ss01";
+    min-height: 100dvh;
+  }
+  ::selection {
+    background: rgb(255 201 74 / 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gunes);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  h1, h2, h3, .baslik {
+    font-family: var(--font-display);
+    font-variation-settings: "wdth" 88, "opsz" 48;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  input, textarea, select, button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .yuzey {
+    @apply bg-gece-2 border border-cizgi/70 rounded-kart;
+  }
+  .rakam {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "wdth" 80, "opsz" 72;
+    letter-spacing: -0.03em;
+  }
+  .kaydirma-ince {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-cizgi) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

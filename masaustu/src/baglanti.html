@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'" />
+    <title>Sezgi</title>
+    <link rel="stylesheet" href="stil.css" />
+  </head>
+  <body>
+    <main class="sahne">
+      <form class="kart" id="form">
+        <div class="ust">
+          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <radialGradient id="g" cx="38%" cy="32%" r="75%">
+                <stop offset="0" stop-color="#FFE3A1" />
+                <stop offset=".55" stop-color="#FFC94A" />
+                <stop offset="1" stop-color="#FF7AD9" />
+              </radialGradient>
+            </defs>
+            <path fill="url(#g)" d="M32 4c14 0 27 9 28 26 1 16-11 30-28 30S3 47 4 31C5 14 18 4 32 4Z" />
+            <ellipse cx="23" cy="28" rx="3.6" ry="4.6" fill="#1A1535" />
+            <ellipse cx="41" cy="28" rx="3.6" ry="4.6" fill="#1A1535" />
+            <path d="M21 40c6 6 16 6 22 0" fill="none" stroke="#1A1535" stroke-width="3.6" stroke-linecap="round" />
+          </svg>
+          <div>
+            <h1>Sezgi’ye bağlan</h1>
+            <p>Okulunuzun ya da öğretmeninizin Sezgi sunucusunu seçin.</p>
+          </div>
+        </div>
+
+        <section id="bulunanBolum" hidden>
+          <span class="etiket">Bu ağda bulunan sunucular</span>
+          <div class="bulunan" id="bulunan"></div>
+        </section>
+
+        <div>
+          <label class="etiket" for="adres">Sunucu adresi</label>
+          <input class="alan" id="adres" placeholder="192.168.1.20:5757" autocomplete="off" spellcheck="false" required />
+          <div class="yongalar" id="sonlar"></div>
+        </div>
+
+        <div>
+          <span class="etiket">Bu bilgisayarda</span>
+          <div class="rol" role="group" aria-label="Rol">
+            <button type="button" data-rol="ogrenci" aria-pressed="true"><strong>Derse katılacağım</strong><span>Öğrenci</span></button>
+            <button type="button" data-rol="ogretmen" aria-pressed="false"><strong>Ders yöneteceğim</strong><span>Öğretmen paneli</span></button>
+          </div>
+        </div>
+
+        <p class="hata" id="hata" role="alert"></p>
+        <button class="birincil" id="baglan" type="submit">Bağlan</button>
+        <p class="alt" id="surum"></p>
+      </form>
+    </main>
+    <script src="baglanti.js"></script>
+  </body>
+</html>

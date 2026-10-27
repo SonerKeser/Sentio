@@ -1,0 +1,16 @@
+services:
+  sezgi:
+    build: .
+    image: sezgi:yerel
+    ports:
+      - "5757:5757"
+    volumes:
+      - sezgi-veri:/veri
+    environment:
+      # Öğrencilere gösterilecek adres; https ile yayınlıyorsanız buraya yazın.
+      # Sezgi__GenelAdres: "https://sezgi.okulunuz.edu.tr"
+      Sezgi__VeriSaklamaGun: "180"
+    restart: unless-stopped
+
+volumes:
+  sezgi-veri:

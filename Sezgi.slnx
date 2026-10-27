@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sezgi.Sunucu/Sezgi.Sunucu.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sezgi.Sunucu.Testleri/Sezgi.Sunucu.Testleri.csproj" />
+  </Folder>
+</Solution>

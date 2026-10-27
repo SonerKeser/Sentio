@@ -1,0 +1,91 @@
+{
+  "name": "sezgi-masaustu",
+  "productName": "Sezgi",
+  "version": "1.0.0",
+  "description": "Sezgi masaüstü istemcisi: öğrenci ve öğretmen bilgisayarları için",
+  "author": "Soner Keser",
+  "license": "MIT",
+  "homepage": "https://github.com/SonerKeser/Sezgi",
+  "main": "src/ana.js",
+  "scripts": {
+    "basla": "electron .",
+    "simge": "node betikler/simge-uret.mjs",
+    "paketle": "electron-builder --win --x64 --publish never",
+    "paketle:linux": "electron-builder --linux --x64 --publish never",
+    "paketle:mac": "electron-builder --mac --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "electron": "^45.1.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.sonerkeser.sezgi",
+    "productName": "Sezgi",
+    "copyright": "© 2026 Soner Keser",
+    "directories": {
+      "output": "dist",
+      "buildResources": "simge"
+    },
+    "files": [
+      "src/**/*",
+      "simge/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "simge/simge.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Sezgi-Masaustu-Kurulum.exe",
+      "shortcutName": "Sezgi",
+      "uninstallDisplayName": "Sezgi",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "Sezgi-Masaustu-Tasinabilir.exe"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education",
+      "icon": "simge/simge.png",
+      "artifactName": "Sezgi-Masaustu-linux-x64.AppImage"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.education",
+      "icon": "simge/simge.png",
+      "artifactName": "Sezgi-Masaustu-mac.dmg"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "SonerKeser",
+        "repo": "Sezgi"
+      }
+    ]
+  }
+}

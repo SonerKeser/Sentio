@@ -1,0 +1,43 @@
+name: Sürekli tümleştirme
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sunucu-ve-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Web bağımlılıkları
+        working-directory: web
+        run: npm ci --no-audit --no-fund
+      - name: Web testleri
+        working-directory: web
+        run: npm test
+      - name: Web derlemesi
+        working-directory: web
+        run: npm run build
+      - name: Sunucu testleri
+        run: dotnet test tests/Sezgi.Sunucu.Testleri -c Release
+
+  masaustu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sözdizimi denetimi
+        working-directory: masaustu
+        run: for f in src/*.js; do node --check "$f"; done

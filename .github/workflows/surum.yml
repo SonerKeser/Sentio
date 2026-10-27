@@ -1,0 +1,94 @@
+name: Sürüm paketleri
+
+# Elle tetiklenir: tüm platformlar için sunucu ve masaüstü paketlerini üretip verilen sürüme yükler.
+on:
+  workflow_dispatch:
+    inputs:
+      etiket:
+        description: 'Sürüm etiketi (ör. v1.1.0). Sürüm yoksa taslak olarak oluşturulur.'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sunucu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid: [win-x64, linux-x64, linux-arm64, osx-arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Web arayüzü
+        working-directory: web
+        run: npm ci --no-audit --no-fund && npx vite build
+      - name: Yayımla
+        run: |
+          dotnet publish src/Sezgi.Sunucu -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o yayin/Sezgi-Sunucu-${{ matrix.rid }}
+          rm -f yayin/Sezgi-Sunucu-${{ matrix.rid }}/*.pdb
+          cp betikler/sunucu-oku-beni.txt yayin/Sezgi-Sunucu-${{ matrix.rid }}/OKU-BENI.txt
+          cd yayin
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            (cd Sezgi-Sunucu-${{ matrix.rid }} && zip -qr ../Sezgi-Sunucu-${{ matrix.rid }}.zip .)
+          else
+            cp ../betikler/sezgi.service Sezgi-Sunucu-${{ matrix.rid }}/
+            tar -czf Sezgi-Sunucu-${{ matrix.rid }}.tar.gz Sezgi-Sunucu-${{ matrix.rid }}
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sunucu-${{ matrix.rid }}
+          path: yayin/Sezgi-Sunucu-*.*
+
+  masaustu:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            hedef: --win --x64
+          - os: ubuntu-latest
+            hedef: --linux --x64
+          - os: macos-latest
+            hedef: --mac
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Paketle
+        working-directory: masaustu
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npm ci --no-audit --no-fund
+          npm run simge
+          npx electron-builder ${{ matrix.hedef }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: masaustu-${{ matrix.os }}
+          path: |
+            masaustu/dist/Sezgi-Masaustu-*
+            masaustu/dist/latest*.yml
+
+  yukle:
+    needs: [sunucu, masaustu]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: paketler
+          merge-multiple: true
+      - name: Sürüme yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ETIKET: ${{ inputs.etiket }}
+        run: |
+          gh release view "$ETIKET" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create "$ETIKET" --repo "$GITHUB_REPOSITORY" --draft --title "Sezgi $ETIKET" --notes "Sürüm notları eklenecek."
+          gh release upload "$ETIKET" paketler/* --repo "$GITHUB_REPOSITORY" --clobber

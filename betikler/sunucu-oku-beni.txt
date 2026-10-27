@@ -1,0 +1,27 @@
+SEZGİ SUNUCU
+============
+
+Çalıştırma
+  Windows : Sezgi.Sunucu.exe dosyasını çift tıklayın. Öğretmen paneli tarayıcıda kendiliğinden açılır.
+  Linux   : chmod +x Sezgi.Sunucu && ./Sezgi.Sunucu
+            Hizmet olarak çalıştırmak için sezgi.service dosyasındaki adımları izleyin.
+
+İlk açılışta tarayıcıda http://localhost:5757/panel adresine gidin ve yönetici hesabını oluşturun.
+Öğrenciler aynı ağdan http://<bu-bilgisayarın-ip-adresi>:5757/katil adresiyle ya da
+Sezgi Masaüstü uygulamasıyla katılır. Konsolda yerel ağ adresleri listelenir.
+
+Güvenlik duvarı
+  TCP 5757 : web arayüzü ve canlı bağlantı
+  UDP 5758 : yerel ağda sunucu duyurusu (masaüstü uygulaması sunucuyu kendiliğinden bulur)
+
+Ayarlar
+  appsettings.json dosyasından: port (Urls), veri klasörü, veri saklama süresi (gün),
+  genel adres, https sertifikası. Ayrıntılar: https://github.com/SonerKeser/Sezgi/blob/main/docs/KURULUM.md
+
+Veriler
+  "veri" klasöründe (SQLite). Yedeklemek için sunucuyu durdurup bu klasörü kopyalayın.
+  Biten dersler varsayılan olarak 180 gün sonra kendiliğinden silinir.
+
+Çevrimdışı kurulum
+  "indirmeler" klasörüne koyduğunuz dosyalar (ör. Sezgi-Masaustu-Kurulum.exe) sunucunun ana
+  sayfasındaki "Bu sunucudan indir" bölümünde listelenir.
