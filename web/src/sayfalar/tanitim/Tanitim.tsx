@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowDown, Camera, Cpu, LayoutDashboard, MonitorPlay, Server } from 'lucide-react';
+import { ArrowDown, Camera, ChartLine, CircleHelp, Coffee, Cpu, Flag, Hand, LayoutDashboard, MonitorPlay, Server, Snail } from 'lucide-react';
 import { DUYGU, DUYGULAR, type Duygu } from '../../alan/duygular';
 import { Maskot } from '../../bilesenler/Maskot';
 import { GithubSimgesi, Logo } from '../../bilesenler/marka';
@@ -192,8 +192,8 @@ function Akis() {
   const adimlar: { baslik: string; metin: string; duygu: Duygu }[] = [
     { baslik: 'Dersi başlatın', metin: 'Panelde bir ders açın. Sezgi altı karakterlik bir kod ve karekod üretir; kalıcılık eşiği, izlenen ifadeler ve anonim mod derse özeldir.', duygu: 'notr' },
     { baslik: 'Öğrenciler kodla katılır', metin: 'Tarayıcıdan ya da masaüstü uygulamasından; açık rıza ekranını onaylayan öğrencinin kamerası kendi cihazında çözümlenmeye başlar.', duygu: 'saskin' },
-    { baslik: 'Sınıfın nabzını izleyin', metin: 'Her öğrencinin ifadesi, dikkati ve sınıfın havası saniye saniye akar. Kalıcı bir değişimde uyarı düşer, öğrenciye nazik bir destek mesajı gider.', duygu: 'mutlu' },
-    { baslik: 'Raporla değerlendirin', metin: 'Ders bitince ısı haritası, öne çıkan anlar ve öğrenci özetleri hazırdır. Excel ve CSV olarak indirilebilir.', duygu: 'mutlu' },
+    { baslik: 'Sınıfın nabzını izleyin', metin: 'İfade, dikkat ve sınıfın havası saniye saniye akar. Dersi bölümlere ayırır, yoklama açar, mola verirsiniz; öğrenciler de "Anlamadım" diyebilir ya da söz isteyebilir.', duygu: 'mutlu' },
+    { baslik: 'Raporla değerlendirin', metin: 'Ders bitince bölüm bölüm ölçümler, yoklama sonuçları, ısı haritası ve öğrenci özetleri hazırdır. Dönem analitiği dersleri birbiriyle karşılaştırır.', duygu: 'mutlu' },
   ];
   return (
     <section id="akis" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-24 sm:px-8">
@@ -276,6 +276,8 @@ function PanelBolumu() {
           </div>
         </div>
 
+        <OgrencininSesi />
+
         <div className="mt-16 grid items-center gap-8 rounded-kart border border-cizgi/70 bg-gece p-6 md:grid-cols-[auto_1fr] md:p-8">
           <span className="grid h-16 w-16 place-items-center rounded-2xl bg-gece-3 text-d-saskin">
             <MonitorPlay size={30} />
@@ -290,6 +292,83 @@ function PanelBolumu() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Duygu tahminini tamamlayan açık beyanlar: yoklama ve öğrenci sinyalleri. */
+function OgrencininSesi() {
+  const secenekler: [string, number, string][] = [
+    ['Anladım', 0.58, '#7BDB8A'],
+    ['Kısmen', 0.25, '#FFC94A'],
+    ['Anlamadım', 0.17, '#FF6B5E'],
+  ];
+  const ozellikler = [
+    { simge: <Flag size={18} />, ad: 'Ders bölümleri', metin: 'Konu değiştikçe yeni bölüm açın; rapor her bölümü ayrı değerlendirir, en zorlayıcı olanı işaretler.' },
+    { simge: <Coffee size={18} />, ad: 'Mola', metin: 'Geri sayım boyunca kameralar kapanır, uyarı üretilmez; süre dolunca ders kaldığı yerden sürer.' },
+    { simge: <ChartLine size={18} />, ad: 'Dönem analitiği', metin: 'Bir sınıfın dersler boyunca katılımı, anlama oranı ve ilgi bekleyen öğrenciler tek sayfada.' },
+  ];
+  return (
+    <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+      <div>
+        <h3 className="text-3xl font-bold">Yüz ifadesi tek başına yetmez</h3>
+        <p className="mt-3 max-w-xl leading-relaxed text-soluk">
+          Öğrenci tek dokunuşla “Anlamadım” diyebilir, söz isteyebilir ya da yavaşlamanızı isteyebilir. Siz de anlama, evet/hayır, çoktan seçmeli ya da puan yoklaması açarsınız. Bu açık beyanlar
+          ifade tahminiyle birlikte raporda ve analitikte buluşur.
+        </p>
+        <ul className="mt-6 flex flex-col gap-4">
+          {ozellikler.map((o) => (
+            <li key={o.ad} className="flex gap-3">
+              <span className="mt-0.5 text-gunes">{o.simge}</span>
+              <span>
+                <span className="font-semibold">{o.ad}</span>
+                <span className="block text-soluk">{o.metin}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="rounded-kart border border-cizgi/60 bg-gece p-5">
+          <p className="text-xs font-semibold text-d-korku">Yoklama açık</p>
+          <p className="mt-1 font-semibold">Snell yasası anlaşıldı mı?</p>
+          <div className="mt-4 flex flex-col gap-2">
+            {secenekler.map(([ad, oran, renk], i) => (
+              <div key={ad} className="flex items-center gap-3 text-sm">
+                <span className="w-24 text-soluk">{ad}</span>
+                <div className="h-5 flex-1 overflow-hidden rounded-md bg-gece-4">
+                  <motion.div
+                    className="h-full rounded-md"
+                    style={{ background: renk }}
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${oran * 100}%` }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.15 + i * 0.12, type: 'spring', stiffness: 90, damping: 18 }}
+                  />
+                </div>
+                <span className="rakam w-10 text-right">%{Math.round(oran * 100)}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-silik">22 yanıt, 24 aktif öğrenci</p>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {(
+            [
+              [<CircleHelp key="a" size={17} />, 'Anlamadım', '3', '#FF6B5E'],
+              [<Hand key="s" size={17} />, 'Söz isteyen', '2', '#FFC94A'],
+              [<Snail key="y" size={17} />, 'Yavaşlayın', '1', '#FFC94A'],
+            ] as [React.ReactNode, string, string, string][]
+          ).map(([simge, ad, sayi, renk]) => (
+            <div key={ad} className="rounded-2xl border border-cizgi/60 bg-gece p-3">
+              <span className="flex items-center gap-1.5 text-sm" style={{ color: renk }}>
+                {simge} {ad}
+              </span>
+              <span className="rakam mt-1 block text-2xl font-semibold">{sayi}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -326,7 +405,8 @@ function Sss() {
     ['İnternet bağlantısı gerekir mi?', 'Hayır. Sunucu, analiz modelleri dahil her şeyi kendisi barındırır. Okulun yerel ağında, dışarıya hiç çıkmadan çalışabilir.'],
     ['Hangi video konferans araçlarıyla çalışır?', 'Hepsiyle. Öğrenci istemcisi konferans aracından bağımsız çalışır; galeri analizi ise paylaşılabilen her pencereyi çözümler.'],
     ['Öğrenci bilgisayarı yeterince güçlü olmalı mı?', 'Sıradan bir dizüstü yeterlidir. Analiz saniyede yaklaşık altı kare işler ve ekran kartını kullanır; ekran kartı yoksa işlemciye geçer.'],
-    ['Veriler nerede ve ne kadar saklanır?', 'Yalnızca sizin sunucunuzdaki SQLite veritabanında. Biten dersler varsayılan olarak 180 gün sonra kendiliğinden silinir; süre ayarlanabilir, dersler panelden hemen silinebilir.'],
+    ['Veriler nerede ve ne kadar saklanır?', 'Yalnızca sizin sunucunuzdaki SQLite veritabanında. Biten dersler varsayılan olarak 180 gün sonra kendiliğinden silinir; süre ayarlanabilir, dersler panelden hemen silinebilir. Öğrenci dersten ayrılırken kendi verilerinin silinmesini de seçebilir.'],
+    ['Yedek nasıl alınır?', 'Yönetici hesabıyla Ayarlar sayfasındaki "Yedek indir" düğmesi, sunucu çalışırken tutarlı bir veritabanı kopyası indirir.'],
     ['Tarayıcı neden kamera izni vermiyor?', 'Tarayıcılar kamerayı yalnızca https ya da localhost üzerinde açar. Yerel ağda https yoksa Sezgi Masaüstü uygulaması bu kısıtı sizin sunucunuz için güvenle kaldırır.'],
   ];
   return (

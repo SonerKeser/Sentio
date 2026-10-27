@@ -93,6 +93,32 @@
   }
 }
 
+/* Yazdırma ve PDF: aynı tasarım, kâğıt için açık renklerle. */
+@media print {
+  :root {
+    --color-gece: #ffffff;
+    --color-gece-2: #ffffff;
+    --color-gece-3: #f3f2f8;
+    --color-gece-4: #e4e2ef;
+    --color-cizgi: #d6d3e6;
+    --color-metin: #1a1535;
+    --color-soluk: #4b4670;
+    --color-silik: #6f6a93;
+  }
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .yazdirma-gizle {
+    display: none !important;
+  }
+  .yuzey,
+  .yazdirma-blok,
+  tr {
+    break-inside: avoid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

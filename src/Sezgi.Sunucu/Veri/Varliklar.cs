@@ -166,6 +166,7 @@ public enum UyariTuru : byte
     SinifOlumsuz = 4,
     SinifDikkat = 5,
     OgretmenMesaji = 6,
+    SinifAnlamadi = 7,
 }
 
 public sealed class Uyari
@@ -179,4 +180,109 @@ public sealed class Uyari
     public float? Oran { get; set; }
     public bool OgrenciyeIletildi { get; set; }
     public DateTime Zaman { get; set; } = DateTime.UtcNow;
+}
+
+public enum YoklamaTuru : byte
+{
+    /// <summary>"Anladım / Kısmen / Anlamadım".</summary>
+    Anlama = 0,
+    EvetHayir = 1,
+    Coktan = 2,
+    Puan = 3,
+}
+
+/// <summary>Öğretmenin derste açtığı tek soruluk hızlı yoklama.</summary>
+public sealed class Yoklama
+{
+    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid OturumId { get; set; }
+    public YoklamaTuru Tur { get; set; }
+    public required string Soru { get; set; }
+    public List<string> Secenekler { get; set; } = [];
+    public DateTime Baslangic { get; set; } = DateTime.UtcNow;
+    public DateTime? Bitis { get; set; }
+    public List<YoklamaYaniti> Yanitlar { get; set; } = [];
+}
+
+public sealed class YoklamaYaniti
+{
+    public long Id { get; set; }
+    public Guid YoklamaId { get; set; }
+    public Guid KatilimciId { get; set; }
+    public int Secim { get; set; }
+    public DateTime Zaman { get; set; } = DateTime.UtcNow;
+}
+
+public enum SinyalTuru : byte
+{
+    Anlamadim = 0,
+    Soru = 1,
+    Yavasla = 2,
+}
+
+/// <summary>Öğrencinin kendi beyanı: anlamadım, söz istiyorum, yavaşlar mısınız.</summary>
+public sealed class Sinyal
+{
+    public long Id { get; set; }
+    public Guid OturumId { get; set; }
+    public Guid KatilimciId { get; set; }
+    public SinyalTuru Tur { get; set; }
+    public string? Metin { get; set; }
+    public DateTime Zaman { get; set; } = DateTime.UtcNow;
+    public DateTime? KapanmaZamani { get; set; }
+}
+
+/// <summary>Dersin bir bölümü (konu, alıştırma) ya da mola.</summary>
+public sealed class Bolum
+{
+    public long Id { get; set; }
+    public Guid OturumId { get; set; }
+    public required string Ad { get; set; }
+    public bool Mola { get; set; }
+    public DateTime Baslangic { get; set; } = DateTime.UtcNow;
+    public DateTime? Bitis { get; set; }
+
+    /// <summary>Molanın planlanan bitişi; sunucu yeniden başlarsa geri sayım buradan sürer.</summary>
+    public DateTime? PlanlananBitis { get; set; }
+}
+
+/// <summary>Biten dersin özet ölçümleri; dönem analitiği her seferinde ham ölçümleri taramasın diye saklanır.</summary>
+public sealed class OturumIstatistigi
+{
+    public Guid OturumId { get; set; }
+    public int KatilimciSayisi { get; set; }
+    public int OkumaSayisi { get; set; }
+    public double SureSn { get; set; }
+    public float Dikkat { get; set; }
+    public float Katilim { get; set; }
+    public float Valans { get; set; }
+    public float OlumsuzOran { get; set; }
+    public float YuzOrani { get; set; }
+    public List<float> Dagilim { get; set; } = [];
+    public float? AnlamaOrani { get; set; }
+    public int YoklamaSayisi { get; set; }
+    public int UyariSayisi { get; set; }
+    public int AnlamadimSayisi { get; set; }
+    public int SoruSayisi { get; set; }
+    public DateTime HesaplanmaZamani { get; set; } = DateTime.UtcNow;
+}
+
+public sealed class KatilimciIstatistigi
+{
+    public Guid KatilimciId { get; set; }
+    public Guid OturumId { get; set; }
+    public required string Ad { get; set; }
+
+    /// <summary>Dersler arası eşleştirme için küçük harfe çevrilmiş ad; anonim derslerde boştur.</summary>
+    public string? AdAnahtari { get; set; }
+
+    public KatilimciKaynagi Kaynak { get; set; }
+    public float Dikkat { get; set; }
+    public float Katilim { get; set; }
+    public float Valans { get; set; }
+    public float YuzOrani { get; set; }
+    public Duygu? Baskin { get; set; }
+    public int OkumaSayisi { get; set; }
+    public int UyariSayisi { get; set; }
+    public int AnlamadimSayisi { get; set; }
 }

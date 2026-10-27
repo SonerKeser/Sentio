@@ -63,6 +63,8 @@ public static class KuralMotoru
     public const float SinifDikkatEsik = 0.4f;
     public const long SinifDikkatSureMs = 30_000;
     public const long SinifEnAzBeklemeMs = 180_000;
+    public const float SinifAnlamadiOran = 0.3f;
+    public const long SinifAnlamadiBeklemeMs = 120_000;
 
     public static bool OlumsuzMu(ReadOnlySpan<float> yumusak, OturumAyarlari ayarlar, out Duygu baskin)
     {
@@ -216,6 +218,16 @@ public static class KuralMotoru
         return sonuclar;
     }
 
+    /// <summary>Öğrencilerin kendi beyanı: aktif öğrencilerin %30'u "Anlamadım" dediyse öğretmene hemen haber verilir.</summary>
+    public static KuralSonucu? SinifAnlamadiDegerlendir(SinifKuralDurumu durum, int aktif, int anlamadim, long simdiMs)
+    {
+        if (aktif < SinifEnAzKisi || anlamadim < 2) return null;
+        var oran = anlamadim / (float)aktif;
+        if (oran < SinifAnlamadiOran || durum.Bekleme.Beklemede(UyariTuru.SinifAnlamadi, simdiMs, SinifAnlamadiBeklemeMs)) return null;
+        durum.Bekleme.Isaretle(UyariTuru.SinifAnlamadi, simdiMs);
+        return new KuralSonucu(UyariTuru.SinifAnlamadi, null, anlamadim, oran);
+    }
+
     public static string Metin(KuralSonucu sonuc, string? ad) => sonuc.Tur switch
     {
         UyariTuru.OlumsuzIfade =>
@@ -228,6 +240,8 @@ public static class KuralMotoru
             $"{ad} yorgun görünüyor; gözleri uzun süredir büyük ölçüde kapalı.",
         UyariTuru.SinifOlumsuz =>
             $"Olumsuz ifade taşıyan öğrenci oranı %{Yuzde(sonuc.Oran)} ve bu durum {Yuvarla(sonuc.SureSn)} sn'dir sürüyor. Konuyu farklı bir örnekle açmayı ya da soru almayı düşünebilirsiniz.",
+        UyariTuru.SinifAnlamadi =>
+            $"{Yuvarla(sonuc.SureSn)} öğrenci (aktiflerin %{Yuzde(sonuc.Oran)} kadarı) anlamadığını belirtti. Konuyu bir örnekle yeniden açmak iyi olabilir.",
         UyariTuru.SinifDikkat =>
             $"Sınıfın ortalama dikkati %{Yuzde(sonuc.Oran)} seviyesinde. Kısa bir mola ya da etkileşimli bir etkinlik iyi gelebilir.",
         _ => "",

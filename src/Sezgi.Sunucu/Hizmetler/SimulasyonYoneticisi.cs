@@ -28,6 +28,16 @@ public sealed class SimulasyonYoneticisi(
         "Lal Ekinci", "Toprak Önal",
     ];
 
+    private static readonly string[] Sorular =
+    [
+        "Bu formülü bir daha yazabilir misiniz?",
+        "İkinci adımı anlamadım, tekrar eder misiniz?",
+        "Bir örnek daha çözebilir miyiz?",
+        "Bu konu sınavda çıkacak mı?",
+        "Grafikteki eksenler neyi gösteriyor?",
+        "Neden bu yöntemi seçtik?",
+    ];
+
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _calisanlar = new();
 
     public bool Calisiyor(Guid oturumId) => _calisanlar.ContainsKey(oturumId);
@@ -87,9 +97,12 @@ public sealed class SimulasyonYoneticisi(
     private async Task CalistirAsync(CanliOturum oturum, List<SanalOgrenci> ogrenciler, CancellationToken iptal)
     {
         var isleyici = servisler.GetRequiredService<OlcumIsleyici>();
+        var etkilesim = servisler.GetRequiredService<EtkilesimYoneticisi>();
         var rastgele = new Random();
         var zorKonuBitis = 0L;
         var sonrakiZorKonu = isleyici.SimdiMs + rastgele.Next(60_000, 120_000);
+        Guid? sonYoklama = null;
+        var yanitZamanlari = new Dictionary<SanalOgrenci, long>();
 
         try
         {
@@ -97,6 +110,31 @@ public sealed class SimulasyonYoneticisi(
             while (await zamanlayici.WaitForNextTickAsync(iptal))
             {
                 var simdi = isleyici.SimdiMs;
+                if (oturum.MoladaMi) continue;
+
+                // Yeni yoklama: her sanal öğrenci birkaç saniye içinde, %85 olasılıkla yanıtlar.
+                var yoklama = oturum.AktifYoklama;
+                if (yoklama?.Id != sonYoklama)
+                {
+                    sonYoklama = yoklama?.Id;
+                    yanitZamanlari.Clear();
+                    if (yoklama is not null)
+                    {
+                        foreach (var o in ogrenciler.Where(o => !o.Yok && rastgele.NextDouble() < 0.85))
+                        {
+                            yanitZamanlari[o] = simdi + rastgele.Next(2_000, 14_000);
+                        }
+                    }
+                }
+                if (yoklama is not null)
+                {
+                    foreach (var (o, zaman) in yanitZamanlari.Where(x => x.Value <= simdi).ToList())
+                    {
+                        yanitZamanlari.Remove(o);
+                        await etkilesim.YoklamaYanitlaAsync(oturum, o.Katilimci, yoklama.Id, o.Yanitla(yoklama));
+                    }
+                }
+
                 if (simdi >= sonrakiZorKonu)
                 {
                     zorKonuBitis = simdi + rastgele.Next(22_000, 35_000);
@@ -104,9 +142,25 @@ public sealed class SimulasyonYoneticisi(
                     foreach (var o in ogrenciler.Where(_ => rastgele.NextDouble() < 0.55)) o.ZorKonuyaGir(zorKonuBitis);
                 }
 
+                var zorKonu = simdi < zorKonuBitis;
                 foreach (var ogrenci in ogrenciler)
                 {
                     await isleyici.IsleAsync(oturum, ogrenci.Katilimci, ogrenci.Uret(simdi));
+
+                    // Zorlanan öğrenci zaman zaman kendisi de söyler.
+                    if (ogrenci.Zorlaniyor && rastgele.NextDouble() < (zorKonu ? 0.05 : 0.015))
+                    {
+                        await etkilesim.SinyalGonderAsync(oturum, ogrenci.Katilimci, SinyalTuru.Anlamadim, null);
+                    }
+                    else if (zorKonu && rastgele.NextDouble() < 0.006)
+                    {
+                        await etkilesim.SinyalGonderAsync(oturum, ogrenci.Katilimci, SinyalTuru.Yavasla, null);
+                    }
+                }
+                if (rastgele.NextDouble() < 0.006)
+                {
+                    var soran = ogrenciler[rastgele.Next(ogrenciler.Count)];
+                    if (!soran.Yok) await etkilesim.SinyalGonderAsync(oturum, soran.Katilimci, SinyalTuru.Soru, Sorular[rastgele.Next(Sorular.Length)]);
                 }
             }
         }
@@ -131,6 +185,28 @@ public sealed class SimulasyonYoneticisi(
         private Duygu _olumsuz = Duygu.Uzgun;
 
         public CanliKatilimci Katilimci { get; } = katilimci;
+
+        public bool Zorlaniyor => _hal == Hal.Olumsuz;
+
+        public bool Yok => _hal == Hal.Yok;
+
+        /// <summary>Yoklama yanıtı öğrencinin o anki haline göre seçilir; zorlanan öğrenci "Anlamadım"a yakındır.</summary>
+        public int Yanitla(CanliYoklama yoklama)
+        {
+            double[] agirliklar = yoklama.Tur switch
+            {
+                YoklamaTuru.Anlama => Zorlaniyor ? [0.15, 0.4, 0.45] : [0.7, 0.25, 0.05],
+                YoklamaTuru.EvetHayir => Zorlaniyor ? [0.4, 0.6] : [0.75, 0.25],
+                YoklamaTuru.Puan => Zorlaniyor ? [0.1, 0.25, 0.35, 0.2, 0.1] : [0.02, 0.05, 0.2, 0.4, 0.33],
+                _ => [.. Enumerable.Range(0, yoklama.Secenekler.Length).Select(i => i == 0 ? (Zorlaniyor ? 0.35 : 0.6) : 0.4 / Math.Max(1, yoklama.Secenekler.Length - 1))],
+            };
+            var zar = r.NextDouble() * agirliklar.Sum();
+            for (var i = 0; i < agirliklar.Length; i++)
+            {
+                if ((zar -= agirliklar[i]) <= 0) return Math.Min(i, yoklama.Secenekler.Length - 1);
+            }
+            return 0;
+        }
 
         public void ZorKonuyaGir(long bitis)
         {

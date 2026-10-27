@@ -10,9 +10,12 @@ Sezgi, öğrencilerin yüz ifadesini çözümleyen bir sistemdir. Bu, dikkatle e
 | Yüz tanıma yok | Öğrenci kimliği katılım koduyla verdiği addan gelir. Galeri analizinde yüz tanımlayıcıları yalnızca öğretmenin tarayıcı belleğinde, sayfa açıkken tutulur; sunucuya ya da diske yazılmaz. |
 | Açık rıza | Öğrenci, ne işlendiğini anlatan ekranı onaylamadan katılım kaydı bile oluşmaz. |
 | Kontrol öğrencide | "Duraklat" kamerayı kapatır ve ölçüm göndermeyi durdurur; öğretmen yalnızca "duraklattı" bilgisini görür. |
+| Silme hakkı | Öğrenci dersten ayrılırken "Bu dersteki verilerimi sil" seçeneğiyle ölçümlerini, yoklama yanıtlarını, beyanlarını ve kendisiyle ilgili uyarıları kalıcı olarak sildirebilir; raporda adı görünmez. |
+| Kişisel özet cihazda | Ders sonunda öğrenciye gösterilen özet yalnızca onun cihazında hesaplanır ve gönderilmez. |
+| Mola | Mola boyunca kameralar kapanır, hiçbir ölçüm işlenmez. |
 | Veri en aza indirme | Saklanan: ad, katılım zamanı, saniyelik 7 olasılık + dikkat + göz açıklığı + yüz var/yok, uyarılar. |
 | Anonim mod | Panelde ve raporlarda adlar yerine sıra numaraları. |
-| Saklama süresi | Biten dersler varsayılan 180 gün sonra kendiliğinden silinir; öğretmen bir dersi istediği an silebilir. |
+| Saklama süresi | Biten dersler varsayılan 180 gün sonra kendiliğinden silinir; öğretmen bir dersi istediği an silebilir. Yedek dosyaları da kişisel veri içerir; güvenli saklayın. |
 | Yerinde barındırma | Veriler yalnızca kurumun kendi sunucusundadır; üçüncü taraf hizmet ya da analiz yoktur. |
 
 ## Bilimsel sınırlar

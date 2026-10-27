@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ExternalLink, Trash2, UserPlus } from 'lucide-react';
-import { api } from '../../api/istemci';
-import type { OgretmenBilgisi } from '../../api/turler';
+import { Database, ExternalLink, HardDriveDownload, Trash2, UserPlus } from 'lucide-react';
+import { api, boyutYaz } from '../../api/istemci';
+import type { OgretmenBilgisi, SunucuDurumu } from '../../api/turler';
 import { Alan, Anahtar, Dugme, useBildirim } from '../../bilesenler/ui';
 import { DEPO } from '../../ortam';
 import { usePanel } from './PanelKabugu';
@@ -12,6 +12,7 @@ export default function AyarlarSayfasi() {
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-8">
       <h1 className="text-4xl font-bold sm:text-5xl">Ayarlar</h1>
       <ParolaBolumu />
+      {ogretmen.yonetici && <SunucuBolumu />}
       {ogretmen.yonetici && <OgretmenBolumu />}
       <section className="yuzey p-6">
         <h2 className="text-xl font-semibold">Bu sunucu hakkında</h2>
@@ -29,6 +30,52 @@ export default function AyarlarSayfasi() {
         </div>
       </section>
     </div>
+  );
+}
+
+function SunucuBolumu() {
+  const [durum, setDurum] = useState<SunucuDurumu | null>(null);
+  useEffect(() => {
+    const yukle = () => api<SunucuDurumu>('/api/yonetim/durum').then(setDurum).catch(() => {});
+    yukle();
+    const z = setInterval(yukle, 15_000);
+    return () => clearInterval(z);
+  }, []);
+
+  const calisma = durum ? `${Math.floor(durum.calismaSuresiSn / 3600)} sa ${Math.floor((durum.calismaSuresiSn % 3600) / 60)} dk` : '—';
+  const olcular: [string, string][] = durum
+    ? [
+        ['Canlı ders', String(durum.canliDers)],
+        ['Bağlı öğrenci', String(durum.cevrimiciOgrenci)],
+        ['Toplam ders', String(durum.dersSayisi)],
+        ['Ölçüm', durum.olcumSayisi.toLocaleString('tr-TR')],
+        ['Veritabanı', boyutYaz(durum.veritabaniBayt)],
+        ['Çalışma süresi', calisma],
+      ]
+    : [];
+
+  return (
+    <section className="yuzey flex flex-col gap-5 p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 text-xl font-semibold">
+            <Database size={20} className="text-gunes" /> Sunucu
+          </h2>
+          <p className="mt-1 text-sm text-silik">Yedek, sunucu çalışırken alınabilen tutarlı bir SQLite dosyasıdır. Geri yüklemek için sunucuyu durdurup veri klasöründeki sezgi.db ile değiştirin.</p>
+        </div>
+        <a href="/api/yonetim/yedek" className="inline-flex h-10 items-center gap-2 rounded-pill bg-gunes px-4 font-semibold text-gece hover:bg-gunes-koyu">
+          <HardDriveDownload size={18} /> Yedek indir
+        </a>
+      </div>
+      <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {olcular.map(([ad, deger]) => (
+          <div key={ad}>
+            <dt className="text-sm text-silik">{ad}</dt>
+            <dd className="rakam text-2xl font-semibold">{deger}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 

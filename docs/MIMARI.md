@@ -96,17 +96,35 @@ Electron 45. Arayüz sunucudan yüklenir; uygulama şunları ekler:
 
 Güvenlik: `contextIsolation`, `sandbox`, `nodeIntegration: false`; sayfaya yalnızca dört işlevlik dar bir köprü açılır; izinler (kamera, ekran paylaşımı) yalnızca seçilen sunucu kökenine verilir, mikrofon hiç istenmez; sunucu dışındaki bağlantılar varsayılan tarayıcıda açılır.
 
+## Etkileşim katmanı
+
+Duygu tahmini öğrencinin iç dünyasını bilemez; Sezgi bunu öğrencinin açık beyanlarıyla tamamlar (`Hizmetler/EtkilesimYoneticisi.cs`).
+
+| Özellik | Davranış |
+| --- | --- |
+| Sinyaller | "Anlamadım" ve "Yavaşlar mısınız" 90 sn sonra kendiliğinden düşer; aynı beyan yinelenince süresi uzar. Söz isteği öğretmen yanıtlayana ya da öğrenci geri alana dek kalır. Öğrenci başına 3 sn hız sınırı. |
+| Sınıf geneli | Aktif öğrencilerin en az %30'u (en az 2 kişi) "Anlamadım" derse öğretmene uyarı düşer (120 sn bekleme). |
+| Yoklama | Aynı anda bir açık yoklama; türler: anlama (Anladım/Kısmen/Anlamadım), evet/hayır, çoktan seçmeli (2-6 seçenek), 1-5 puan. Yanıt, yoklama kapanana dek değiştirilebilir. Anlama oranı = (Anladım + Kısmen/2) / yanıt. |
+| Bölüm | Açık bölüm kapanır, yenisi açılır. Rapor her bölüm için ifade dağılımı, dikkat, olumsuz oran ve sinyal sayısı verir. |
+| Mola | Planlanan bitişle saklanır; molada ölçümler işlenmez, sınıf kuralları çalışmaz, açık yoklama kapanır, kural sayaçları sıfırlanır. Süre dolunca moladan önceki bölüm sürer. |
+
+Sunucu ders sürerken yeniden başlarsa açık yoklama (yanıtlarıyla), bölümler, mola ve söz istekleri veritabanından geri yüklenir.
+
+## Dönem analitiği
+
+Ders bitince `IstatistikHesaplayici` raporu hesaplayıp `OturumIstatistikleri` ve `KatilimciIstatistikleri` tablolarına özet yazar; analitik sayfası ham ölçümleri taramadan bu özetlerden çalışır. Öğrenciler dersler arasında Türkçe büyük/küçük harf kurallarıyla küçültülmüş adlarıyla eşleştirilir; anonim dersler ve verilerini silen öğrenciler eşleştirmeye girmez.
+
 ## Gerçek zamanlı protokol
 
-**Öğrenci → sunucu** (`/hub/ogrenci`, `access_token` = katılım jetonu): `Okuma(OkumaGirdisi)`, `Duraklat(bool)`, `Ayril()`.
-**Sunucu → öğrenci:** `Ayarlar`, `Durtme(DurtmeBildirimi)`, `OturumBitti`.
+**Öğrenci → sunucu** (`/hub/ogrenci`, `access_token` = katılım jetonu): `Okuma(OkumaGirdisi)`, `Duraklat(bool)`, `Sinyal(tur, metin?)`, `SinyalGeriAl(tur)`, `YoklamaYanitla(yoklamaId, secim)`, `Ayril(verileriSil)`.
+**Sunucu → öğrenci:** `Durum(OgrenciDurumu)` bağlanınca, `Ayarlar`, `Durtme`, `Yoklama`, `YoklamaKapandi`, `Mola(MolaBildirimi?)`, `SinyalKapandi(tur)`, `OturumBitti`.
 
-**Öğretmen → sunucu** (`/hub/ogretmen`, çerez): `Izle(oturumId)`, `Birak`, `MesajGonder(oturumId, katilimciId?, metin)`, `GaleriOkumalari(oturumId, okumalar[])`, `GaleriAdDegistir`.
-**Sunucu → öğretmen:** `Anlik(AnlikGoruntu)` saniyede bir, `Uyari`, `OturumGuncellendi`, `OturumBitti`.
+**Öğretmen → sunucu** (`/hub/ogretmen`, çerez): `Izle(oturumId)`, `Birak`, `MesajGonder`, `YoklamaBaslat`, `YoklamaKapat`, `SinyalYanitla`, `SinyalleriTemizle`, `BolumBaslat`, `MolaBaslat(dakika)`, `MolaBitir`, `GaleriOkumalari`, `GaleriAdDegistir`.
+**Sunucu → öğretmen:** `Anlik(AnlikGoruntu)` saniyede bir (sınıf özeti, katılımcılar ve etkileşim durumu), `Uyari`, `OturumGuncellendi`, `OturumBitti`.
 
 ## Veri modeli
 
-`Ogretmen` → `Oturum` (ayarlar gömülü) → `Katilimci` (kaynak: kamera, galeri, simülasyon), `Okuma` (saniyelik, yüzdeler bayt olarak), `Uyari`. Okumalar `(OturumId, ZamanMs)` ve `(KatilimciId, ZamanMs)` dizinleriyle tutulur; 30 öğrencilik 40 dakikalık bir ders yaklaşık 2 MB yer kaplar.
+`Ogretmen` → `Oturum` (ayarlar gömülü) → `Katilimci` (kaynak: kamera, galeri, simülasyon), `Okuma` (saniyelik, yüzdeler bayt olarak), `Uyari`, `Yoklama` → `YoklamaYaniti`, `Sinyal`, `Bolum`, `OturumIstatistigi`, `KatilimciIstatistigi`. Okumalar `(OturumId, ZamanMs)` ve `(KatilimciId, ZamanMs)` dizinleriyle tutulur; 30 öğrencilik 40 dakikalık bir ders yaklaşık 2 MB yer kaplar.
 
 ## Güvenlik
 

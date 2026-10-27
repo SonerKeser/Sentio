@@ -33,6 +33,9 @@ public sealed class CanliKatilimci(Guid id, Guid oturumId, string ad, int siraNo
     public Duygu? UyariDuygusu { get; set; }
     public int UyariSayisi { get; set; }
 
+    /// <summary>Sinyal gönderme hız sınırı için son sinyal zamanı.</summary>
+    public long SonSinyalMs { get; set; }
+
     public string GorunenAd(bool anonim) => anonim ? $"Katılımcı {SiraNo}" : Ad;
 
     /// <summary>Kilit altında çağrılmalıdır.</summary>
@@ -75,6 +78,40 @@ public sealed class CanliKatilimci(Guid id, Guid oturumId, string ad, int siraNo
     }
 }
 
+public sealed class CanliYoklama(Guid id, YoklamaTuru tur, string soru, string[] secenekler, long baslangicMs)
+{
+    public Guid Id { get; } = id;
+    public YoklamaTuru Tur { get; } = tur;
+    public string Soru { get; } = soru;
+    public string[] Secenekler { get; } = secenekler;
+    public long BaslangicMs { get; } = baslangicMs;
+    public ConcurrentDictionary<Guid, int> Yanitlar { get; } = new();
+
+    public int[] Sayilar()
+    {
+        var sayilar = new int[Secenekler.Length];
+        foreach (var secim in Yanitlar.Values)
+        {
+            if (secim >= 0 && secim < sayilar.Length) sayilar[secim]++;
+        }
+        return sayilar;
+    }
+}
+
+public sealed record CanliSinyal(long Id, Guid KatilimciId, SinyalTuru Tur, string? Metin, long ZamanMs);
+
+public sealed class CanliBolum(long id, string ad, bool mola, long baslangicMs, long? molaBitisMs)
+{
+    public long Id { get; } = id;
+    public string Ad { get; } = ad;
+    public bool Mola { get; } = mola;
+    public long BaslangicMs { get; } = baslangicMs;
+    public long? MolaBitisMs { get; } = molaBitisMs;
+    public long? BitisMs { get; set; }
+
+    public BolumDurumu Durum() => new(Id, Ad, Mola, BaslangicMs, BitisMs, MolaBitisMs);
+}
+
 public sealed class CanliOturum
 {
     private int _siraNo;
@@ -114,6 +151,19 @@ public sealed class CanliOturum
 
     public int Izleyici;
 
+    /// <summary>Açık yoklama; aynı anda en fazla bir tane olur.</summary>
+    public CanliYoklama? AktifYoklama { get; set; }
+
+    /// <summary>Sinyaller ve bölümler bu kilitle korunur.</summary>
+    public Lock EtkilesimKilidi { get; } = new();
+    public List<CanliSinyal> Sinyaller { get; } = [];
+    public List<CanliBolum> Bolumler { get; } = [];
+
+    /// <summary>Mola sürüyorsa bitiş zamanı (unix ms), sürmüyorsa 0. Ölçüm hattı bunu kilitsiz okur.</summary>
+    public long MolaBitisMs;
+
+    public bool MoladaMi => Volatile.Read(ref MolaBitisMs) > 0;
+
     public int SonrakiSiraNo() => Interlocked.Increment(ref _siraNo);
 
     public void UyariEkle(UyariBildirimi uyari)
@@ -128,6 +178,17 @@ public sealed class CanliOturum
     public IReadOnlyList<UyariBildirimi> SonUyarilar()
     {
         lock (_uyariKilidi) return [.. _sonUyarilar.Reverse()];
+    }
+
+    /// <summary>Verilerini silen öğrencinin adı canlı uyarı akışında da kalmasın.</summary>
+    public void UyarilariKaldir(Guid katilimciId)
+    {
+        lock (_uyariKilidi)
+        {
+            var kalan = _sonUyarilar.Where(u => u.KatilimciId != katilimciId).ToList();
+            _sonUyarilar.Clear();
+            foreach (var u in kalan) _sonUyarilar.Enqueue(u);
+        }
     }
 
     public void UyarilariYukle(IEnumerable<UyariBildirimi> eskidenYeniye)

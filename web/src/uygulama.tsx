@@ -11,6 +11,7 @@ const Oturumlar = lazy(() => import('./sayfalar/panel/Oturumlar'));
 const CanliPanel = lazy(() => import('./sayfalar/panel/CanliPanel'));
 const RaporSayfasi = lazy(() => import('./sayfalar/panel/RaporSayfasi'));
 const AyarlarSayfasi = lazy(() => import('./sayfalar/panel/AyarlarSayfasi'));
+const AnalitikSayfasi = lazy(() => import('./sayfalar/panel/AnalitikSayfasi'));
 
 function Yukleniyor() {
   return (
@@ -36,6 +37,7 @@ export function Uygulama() {
                   <Route index element={<Tembel><Oturumlar /></Tembel>} />
                   <Route path="oturum/:id" element={<Tembel><CanliPanel /></Tembel>} />
                   <Route path="oturum/:id/rapor" element={<Tembel><RaporSayfasi /></Tembel>} />
+                  <Route path="analitik" element={<Tembel><AnalitikSayfasi /></Tembel>} />
                   <Route path="ayarlar" element={<Tembel><AyarlarSayfasi /></Tembel>} />
                 </Route>
               </>

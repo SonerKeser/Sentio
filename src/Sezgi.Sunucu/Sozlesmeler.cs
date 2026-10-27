@@ -94,7 +94,8 @@ public sealed record KatilimciAnligi(
     long? SonOkumaMs,
     Duygu? UyariDuygusu,
     int UyariSayisi,
-    string? DisKimlik);
+    string? DisKimlik,
+    SinyalTuru? Sinyal);
 
 public sealed record SinifOzeti(
     int Toplam,
@@ -106,7 +107,50 @@ public sealed record SinifOzeti(
     float Katilim,
     float OlumsuzOran);
 
-public sealed record AnlikGoruntu(Guid OturumId, long ZamanMs, SinifOzeti Sinif, IReadOnlyList<KatilimciAnligi> Katilimcilar);
+public sealed record AnlikGoruntu(
+    Guid OturumId,
+    long ZamanMs,
+    SinifOzeti Sinif,
+    IReadOnlyList<KatilimciAnligi> Katilimcilar,
+    EtkilesimDurumu Etkilesim);
+
+// Etkileşim: öğrenci sinyalleri, hızlı yoklama, ders bölümleri ve mola
+
+public sealed record SinyalBildirimi(long Id, Guid KatilimciId, string Ad, SinyalTuru Tur, string? Metin, long ZamanMs);
+
+public sealed record YoklamaDurumu(Guid Id, YoklamaTuru Tur, string Soru, string[] Secenekler, int[] Sayilar, int Yanitlayan, long BaslangicMs);
+
+public sealed record BolumDurumu(long Id, string Ad, bool Mola, long BaslangicMs, long? BitisMs, long? MolaBitisMs);
+
+public sealed record EtkilesimDurumu(
+    IReadOnlyList<SinyalBildirimi> Sorular,
+    int Anlamadim,
+    int Yavasla,
+    YoklamaDurumu? Yoklama,
+    BolumDurumu? Bolum,
+    IReadOnlyList<BolumDurumu> Bolumler);
+
+public sealed record YoklamaIstegi(YoklamaTuru Tur, string? Soru, string[]? Secenekler);
+
+/// <summary>Öğrenciye giden yoklama; <paramref name="Secim"/> öğrenci daha önce yanıtladıysa doludur.</summary>
+public sealed record YoklamaBildirimi(Guid Id, YoklamaTuru Tur, string Soru, string[] Secenekler, int? Secim);
+
+public sealed record MolaBildirimi(long BitisMs);
+
+/// <summary>Öğrenci bağlandığında ya da yeniden bağlandığında dersin o anki durumu.</summary>
+public sealed record OgrenciDurumu(OgrenciAyarlari Ayarlar, YoklamaBildirimi? Yoklama, MolaBildirimi? Mola, SinyalTuru[] AcikSinyaller);
+
+// Yönetim
+
+public sealed record SunucuDurumu(
+    string Surum,
+    long CalismaSuresiSn,
+    int CanliDers,
+    int CevrimiciOgrenci,
+    long VeritabaniBayt,
+    int OgretmenSayisi,
+    int DersSayisi,
+    long OlcumSayisi);
 
 public sealed record UyariBildirimi(
     long Id,

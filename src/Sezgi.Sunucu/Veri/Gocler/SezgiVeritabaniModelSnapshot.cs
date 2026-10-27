@@ -17,6 +17,39 @@ namespace Sezgi.Sunucu.Veri.Gocler
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Bolum", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Baslangic")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Bitis")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Mola")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("OturumId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PlanlananBitis")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OturumId", "Baslangic");
+
+                    b.ToTable("Bolumler");
+                });
+
             modelBuilder.Entity("Sezgi.Sunucu.Veri.Katilimci", b =>
                 {
                     b.Property<Guid>("Id")
@@ -58,6 +91,60 @@ namespace Sezgi.Sunucu.Veri.Gocler
                     b.HasIndex("OturumId");
 
                     b.ToTable("Katilimcilar");
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.KatilimciIstatistigi", b =>
+                {
+                    b.Property<Guid>("KatilimciId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AdAnahtari")
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AnlamadimSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte?>("Baskin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Dikkat")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Katilim")
+                        .HasColumnType("REAL");
+
+                    b.Property<byte>("Kaynak")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OkumaSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("OturumId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UyariSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Valans")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("YuzOrani")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("KatilimciId");
+
+                    b.HasIndex("AdAnahtari");
+
+                    b.HasIndex("OturumId");
+
+                    b.ToTable("KatilimciIstatistikleri");
                 });
 
             modelBuilder.Entity("Sezgi.Sunucu.Veri.Ogretmen", b =>
@@ -190,6 +277,96 @@ namespace Sezgi.Sunucu.Veri.Gocler
                     b.ToTable("Oturumlar");
                 });
 
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.OturumIstatistigi", b =>
+                {
+                    b.Property<Guid>("OturumId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float?>("AnlamaOrani")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("AnlamadimSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("Dagilim")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Dikkat")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("HesaplanmaZamani")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Katilim")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("KatilimciSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OkumaSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("OlumsuzOran")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("SoruSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("SureSn")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("UyariSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Valans")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("YoklamaSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("YuzOrani")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("OturumId");
+
+                    b.ToTable("OturumIstatistikleri");
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Sinyal", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("KapanmaZamani")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("KatilimciId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Metin")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OturumId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte>("Tur")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Zaman")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KatilimciId");
+
+                    b.HasIndex("OturumId", "Zaman");
+
+                    b.ToTable("Sinyaller");
+                });
+
             modelBuilder.Entity("Sezgi.Sunucu.Veri.Uyari", b =>
                 {
                     b.Property<long>("Id")
@@ -229,10 +406,88 @@ namespace Sezgi.Sunucu.Veri.Gocler
                     b.ToTable("Uyarilar");
                 });
 
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Yoklama", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Baslangic")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Bitis")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OturumId")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("Secenekler")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Soru")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte>("Tur")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OturumId", "Baslangic");
+
+                    b.ToTable("Yoklamalar");
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.YoklamaYaniti", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("KatilimciId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Secim")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("YoklamaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Zaman")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("YoklamaId", "KatilimciId")
+                        .IsUnique();
+
+                    b.ToTable("YoklamaYanitlari");
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Bolum", b =>
+                {
+                    b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
+                        .WithMany()
+                        .HasForeignKey("OturumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Sezgi.Sunucu.Veri.Katilimci", b =>
                 {
                     b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
                         .WithMany("Katilimcilar")
+                        .HasForeignKey("OturumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.KatilimciIstatistigi", b =>
+                {
+                    b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
+                        .WithMany()
                         .HasForeignKey("OturumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -305,6 +560,24 @@ namespace Sezgi.Sunucu.Veri.Gocler
                     b.Navigation("Ogretmen");
                 });
 
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.OturumIstatistigi", b =>
+                {
+                    b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
+                        .WithOne()
+                        .HasForeignKey("Sezgi.Sunucu.Veri.OturumIstatistigi", "OturumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Sinyal", b =>
+                {
+                    b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
+                        .WithMany()
+                        .HasForeignKey("OturumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Sezgi.Sunucu.Veri.Uyari", b =>
                 {
                     b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
@@ -314,9 +587,32 @@ namespace Sezgi.Sunucu.Veri.Gocler
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Yoklama", b =>
+                {
+                    b.HasOne("Sezgi.Sunucu.Veri.Oturum", null)
+                        .WithMany()
+                        .HasForeignKey("OturumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.YoklamaYaniti", b =>
+                {
+                    b.HasOne("Sezgi.Sunucu.Veri.Yoklama", null)
+                        .WithMany("Yanitlar")
+                        .HasForeignKey("YoklamaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Sezgi.Sunucu.Veri.Oturum", b =>
                 {
                     b.Navigation("Katilimcilar");
+                });
+
+            modelBuilder.Entity("Sezgi.Sunucu.Veri.Yoklama", b =>
+                {
+                    b.Navigation("Yanitlar");
                 });
 #pragma warning restore 612, 618
         }

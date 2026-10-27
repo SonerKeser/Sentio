@@ -9,6 +9,12 @@ public sealed class SezgiVeritabani(DbContextOptions<SezgiVeritabani> secenekler
     public DbSet<Katilimci> Katilimcilar => Set<Katilimci>();
     public DbSet<Okuma> Okumalar => Set<Okuma>();
     public DbSet<Uyari> Uyarilar => Set<Uyari>();
+    public DbSet<Yoklama> Yoklamalar => Set<Yoklama>();
+    public DbSet<YoklamaYaniti> YoklamaYanitlari => Set<YoklamaYaniti>();
+    public DbSet<Sinyal> Sinyaller => Set<Sinyal>();
+    public DbSet<Bolum> Bolumler => Set<Bolum>();
+    public DbSet<OturumIstatistigi> OturumIstatistikleri => Set<OturumIstatistigi>();
+    public DbSet<KatilimciIstatistigi> KatilimciIstatistikleri => Set<KatilimciIstatistigi>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder yapilandirma)
     {
@@ -61,6 +67,47 @@ public sealed class SezgiVeritabani(DbContextOptions<SezgiVeritabani> secenekler
         {
             e.Property(x => x.Mesaj).HasMaxLength(500);
             e.HasIndex(x => new { x.OturumId, x.Zaman });
+            e.HasOne<Oturum>().WithMany().HasForeignKey(x => x.OturumId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<Yoklama>(e =>
+        {
+            e.Property(x => x.Soru).HasMaxLength(200);
+            e.HasIndex(x => new { x.OturumId, x.Baslangic });
+            e.HasOne<Oturum>().WithMany().HasForeignKey(x => x.OturumId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(x => x.Yanitlar).WithOne().HasForeignKey(x => x.YoklamaId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<YoklamaYaniti>(e => e.HasIndex(x => new { x.YoklamaId, x.KatilimciId }).IsUnique());
+
+        model.Entity<Sinyal>(e =>
+        {
+            e.Property(x => x.Metin).HasMaxLength(200);
+            e.HasIndex(x => new { x.OturumId, x.Zaman });
+            e.HasIndex(x => x.KatilimciId);
+            e.HasOne<Oturum>().WithMany().HasForeignKey(x => x.OturumId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<Bolum>(e =>
+        {
+            e.Property(x => x.Ad).HasMaxLength(80);
+            e.HasIndex(x => new { x.OturumId, x.Baslangic });
+            e.HasOne<Oturum>().WithMany().HasForeignKey(x => x.OturumId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<OturumIstatistigi>(e =>
+        {
+            e.HasKey(x => x.OturumId);
+            e.HasOne<Oturum>().WithOne().HasForeignKey<OturumIstatistigi>(x => x.OturumId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<KatilimciIstatistigi>(e =>
+        {
+            e.HasKey(x => x.KatilimciId);
+            e.Property(x => x.Ad).HasMaxLength(80);
+            e.Property(x => x.AdAnahtari).HasMaxLength(80);
+            e.HasIndex(x => x.OturumId);
+            e.HasIndex(x => x.AdAnahtari);
             e.HasOne<Oturum>().WithMany().HasForeignKey(x => x.OturumId).OnDelete(DeleteBehavior.Cascade);
         });
     }

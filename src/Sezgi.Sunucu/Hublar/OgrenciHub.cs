@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.SignalR;
 using Sezgi.Sunucu.Canli;
 using Sezgi.Sunucu.Guvenlik;
 using Sezgi.Sunucu.Hizmetler;
+using Sezgi.Sunucu.Veri;
 
 namespace Sezgi.Sunucu.Hublar;
 
 [Authorize(Policy = Yetki.Katilimci)]
-public sealed class OgrenciHub(CanliOturumDeposu depo, OlcumIsleyici isleyici, OturumYoneticisi yonetici) : Hub
+public sealed class OgrenciHub(CanliOturumDeposu depo, OlcumIsleyici isleyici, OturumYoneticisi yonetici, EtkilesimYoneticisi etkilesim) : Hub
 {
     public static string OturumGrubu(Guid oturumId) => $"s:{oturumId:N}";
 
@@ -19,7 +20,7 @@ public sealed class OgrenciHub(CanliOturumDeposu depo, OlcumIsleyici isleyici, O
         await Groups.AddToGroupAsync(Context.ConnectionId, OturumGrubu(oturum.Id));
         await Groups.AddToGroupAsync(Context.ConnectionId, KatilimciGrubu(katilimci.Id));
         lock (katilimci.Kilit) katilimci.BaglantiSayisi++;
-        await Clients.Caller.SendAsync("Ayarlar", OturumYoneticisi.OgrenciAyarlari(oturum.Ayarlar));
+        await Clients.Caller.SendAsync("Durum", etkilesim.OgrenciDurumu(oturum, katilimci));
         await base.OnConnectedAsync();
     }
 
@@ -49,10 +50,29 @@ public sealed class OgrenciHub(CanliOturumDeposu depo, OlcumIsleyici isleyici, O
         }
     }
 
-    public Task Ayril()
+    /// <summary>Öğrenci dersten ayrılır; isterse bu dersteki bütün ölçümleri ve beyanları silinir (silme hakkı).</summary>
+    public Task Ayril(bool verileriSil)
     {
         var (oturum, katilimci) = Kimlik();
-        return yonetici.KatilimciAyrildiAsync(oturum, katilimci);
+        return yonetici.KatilimciAyrildiAsync(oturum, katilimci, verileriSil);
+    }
+
+    public async Task<bool> Sinyal(SinyalTuru tur, string? metin)
+    {
+        var (oturum, katilimci) = Kimlik();
+        return await etkilesim.SinyalGonderAsync(oturum, katilimci, tur, metin);
+    }
+
+    public Task SinyalGeriAl(SinyalTuru tur)
+    {
+        var (oturum, katilimci) = Kimlik();
+        return etkilesim.SinyalGeriAlAsync(oturum, katilimci.Id, tur);
+    }
+
+    public async Task<bool> YoklamaYanitla(Guid yoklamaId, int secim)
+    {
+        var (oturum, katilimci) = Kimlik();
+        return await etkilesim.YoklamaYanitlaAsync(oturum, katilimci, yoklamaId, secim);
     }
 
     private (CanliOturum Oturum, CanliKatilimci Katilimci) Kimlik() =>

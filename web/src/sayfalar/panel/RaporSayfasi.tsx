@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { motion } from 'motion/react';
-import { ChevronLeft, FileSpreadsheet, FileText, Radio, Sparkles, TrendingDown, Frown } from 'lucide-react';
+import { ChevronLeft, FileSpreadsheet, FileText, Frown, Printer, Radio, Sparkles, TrendingDown } from 'lucide-react';
 import { DUYGU, DUYGULAR, yuzde, type Duygu } from '../../alan/duygular';
 import { api } from '../../api/istemci';
 import type { Rapor } from '../../api/turler';
@@ -11,6 +11,7 @@ import { DuyguAkisi, Gosterge } from './canli/DuyguAkisi';
 import { KAYNAK_ADI } from './canli/OgrenciKarosu';
 import type { AkisNoktasi } from './canli/useCanliOturum';
 import { UyariAkisi } from './canli/UyariAkisi';
+import { BolumTablosu, SinyalListesi, YoklamaSonuclari } from './rapor/RaporEtkilesim';
 
 const saat = (ms: number) => new Date(ms).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
@@ -55,7 +56,7 @@ export default function RaporSayfasi() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-8">
       <header className="flex flex-wrap items-start gap-4">
-        <Link to="/panel" className="mt-1 rounded-full p-2 text-silik hover:bg-gece-2 hover:text-metin" aria-label="Derslere dön">
+        <Link to="/panel" className="yazdirma-gizle mt-1 rounded-full p-2 text-silik hover:bg-gece-2 hover:text-metin" aria-label="Derslere dön">
           <ChevronLeft size={22} />
         </Link>
         <div className="min-w-0 flex-1">
@@ -65,7 +66,7 @@ export default function RaporSayfasi() {
           </p>
           <h1 className="text-4xl font-bold sm:text-5xl">{oturum.baslik}</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="yazdirma-gizle flex flex-wrap gap-2">
           {oturum.durum === 'canli' && (
             <Link to={`/panel/oturum/${id}`} className="inline-flex h-10 items-center gap-2 rounded-pill border border-d-ofkeli/40 px-4 font-semibold text-d-ofkeli">
               <Radio size={17} /> Canlı panele dön
@@ -76,6 +77,9 @@ export default function RaporSayfasi() {
           </Dugme>
           <Dugme simge={<FileText size={18} />} onClick={() => indir(`/api/oturumlar/${id}/okumalar.csv`)}>
             Ham veri (CSV)
+          </Dugme>
+          <Dugme tur="hayalet" simge={<Printer size={18} />} onClick={() => window.print()}>
+            Yazdır / PDF
           </Dugme>
         </div>
       </header>
@@ -100,7 +104,11 @@ export default function RaporSayfasi() {
               <Rakam ad="Ortalama dikkat" deger={yuzde(s.dikkat)} />
               <Rakam ad="Ortalama katılım" deger={yuzde(s.katilim)} />
               <Rakam ad="Kamerada görünme" deger={yuzde(s.yuzOrani)} />
-              <Rakam ad="Uyarı" deger={String(s.uyariSayisi)} />
+              {rapor.etkilesim.anlamaOrani !== null ? (
+                <Rakam ad="Yoklamada anlama" deger={yuzde(rapor.etkilesim.anlamaOrani)} />
+              ) : (
+                <Rakam ad="Uyarı" deger={String(s.uyariSayisi)} />
+              )}
               <div className="col-span-full">
                 <TayfCubugu dagilim={s.dagilim} yukseklik={12} />
               </div>
@@ -131,9 +139,17 @@ export default function RaporSayfasi() {
               <h2 className="text-xl font-semibold">Ders boyunca sınıfın ifadesi</h2>
               <Gosterge />
             </div>
-            <DuyguAkisi akis={akis} yukseklik={240} pencereMs={Number.MAX_SAFE_INTEGER} />
+            <DuyguAkisi
+              akis={akis}
+              yukseklik={240}
+              pencereMs={Number.MAX_SAFE_INTEGER}
+              bolumler={rapor.etkilesim.bolumler}
+              isaretler={rapor.etkilesim.yoklamalar.map((y, i) => ({ zamanMs: y.zamanMs, etiket: `Y${i + 1}` }))}
+            />
           </section>
 
+          <BolumTablosu rapor={rapor} />
+          <YoklamaSonuclari rapor={rapor} />
           <IsiHaritasi rapor={rapor} />
 
           <section>
@@ -148,6 +164,7 @@ export default function RaporSayfasi() {
                     <th className="px-4 py-3 text-right font-medium">Dikkat</th>
                     <th className="px-4 py-3 text-right font-medium">Katılım</th>
                     <th className="px-4 py-3 text-right font-medium">Kamerada</th>
+                    <th className="px-4 py-3 text-right font-medium">Anlamadım</th>
                     <th className="px-4 py-3 text-right font-medium">Uyarı</th>
                   </tr>
                 </thead>
@@ -172,6 +189,7 @@ export default function RaporSayfasi() {
                       <td className="rakam px-4 py-3 text-right text-base">{yuzde(k.dikkat)}</td>
                       <td className="rakam px-4 py-3 text-right text-base">{yuzde(k.katilim)}</td>
                       <td className="rakam px-4 py-3 text-right text-base">{yuzde(k.yuzOrani)}</td>
+                      <td className="rakam px-4 py-3 text-right text-base">{k.anlamadimSayisi}</td>
                       <td className="rakam px-4 py-3 text-right text-base">{k.uyariSayisi}</td>
                     </tr>
                   ))}
@@ -180,7 +198,9 @@ export default function RaporSayfasi() {
             </div>
           </section>
 
-          <section>
+          <SinyalListesi rapor={rapor} />
+
+          <section className="yazdirma-blok">
             <h2 className="mb-3 text-xl font-semibold">Uyarılar ve mesajlar</h2>
             <UyariAkisi uyarilar={[...rapor.uyarilar].reverse()} />
           </section>

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import { LayoutGrid, LogOut, Settings } from 'lucide-react';
+import { ChartLine, LayoutGrid, LogOut, Settings } from 'lucide-react';
 import { api } from '../../api/istemci';
 import type { HesapDurumu, OgretmenBilgisi } from '../../api/turler';
 import { Maskot } from '../../bilesenler/Maskot';
@@ -46,11 +46,12 @@ export default function PanelKabugu() {
   return (
     <Baglam.Provider value={{ ogretmen: durum.ogretmen, surum: durum.surum }}>
       <div className="flex min-h-dvh flex-col lg:flex-row">
-        <nav className="flex shrink-0 items-center gap-1 border-b border-cizgi/60 bg-gece px-4 py-2.5 lg:sticky lg:top-0 lg:h-dvh lg:w-[76px] lg:flex-col lg:border-b-0 lg:border-r lg:px-0 lg:py-5">
+        <nav className="yazdirma-gizle flex shrink-0 items-center gap-1 border-b border-cizgi/60 bg-gece px-4 py-2.5 lg:sticky lg:top-0 lg:h-dvh lg:w-[76px] lg:flex-col lg:border-b-0 lg:border-r lg:px-0 lg:py-5">
           <NavLink to="/" className="mr-3 lg:mb-6 lg:mr-0" aria-label="Sezgi ana sayfa">
             <LogoIsareti boyut={34} />
           </NavLink>
           <RayBag to="/panel" end simge={<LayoutGrid size={21} />} etiket="Dersler" />
+          <RayBag to="/panel/analitik" simge={<ChartLine size={21} />} etiket="Analitik" />
           <RayBag to="/panel/ayarlar" simge={<Settings size={21} />} etiket="Ayarlar" />
           <div className="ml-auto flex items-center gap-2 lg:ml-0 lg:mt-auto lg:flex-col">
             <span

@@ -47,11 +47,13 @@ builder.Services.AddSingleton<OkumaYazici>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<OkumaYazici>());
 builder.Services.AddSingleton<OlcumIsleyici>();
 builder.Services.AddSingleton<SimulasyonYoneticisi>();
+builder.Services.AddSingleton<EtkilesimYoneticisi>();
 builder.Services.AddSingleton<OturumYoneticisi>();
 builder.Services.AddHostedService<CanliYayinci>();
 builder.Services.AddHostedService<VeriTemizleyici>();
 builder.Services.AddHostedService<AgDuyurucu>();
 builder.Services.AddScoped<RaporOlusturucu>();
+builder.Services.AddScoped<IstatistikHesaplayici>();
 
 builder.Services.AddAuthentication(Yetki.CerezSemasi)
     .AddCookie(Yetki.CerezSemasi, o =>
@@ -164,6 +166,7 @@ HesapUclari.Esle(app);
 OturumUclari.Esle(app);
 KatilimUclari.Esle(app);
 SistemUclari.Esle(app);
+AnalitikUclari.Esle(app);
 app.MapHub<OgretmenHub>("/hub/ogretmen");
 app.MapHub<OgrenciHub>("/hub/ogrenci");
 app.MapFallback("/api/{**yol}", () => Results.NotFound());

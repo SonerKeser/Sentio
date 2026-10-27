@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { BellOff, EyeOff, Frown, MessageCircle, Moon, Send, UserX, Users } from 'lucide-react';
+import { BellOff, CircleHelp, EyeOff, Frown, MessageCircle, Moon, Send, UserX, Users } from 'lucide-react';
 import { DUYGU } from '../../../alan/duygular';
 import type { UyariBildirimi, UyariTuru } from '../../../api/turler';
 import { saatYaz, sinif } from '../../../bilesenler/ui';
@@ -11,6 +11,7 @@ const SIMGE: Record<UyariTuru, React.ReactNode> = {
   uyuklama: <Moon size={17} />,
   sinifOlumsuz: <Users size={17} />,
   sinifDikkat: <Users size={17} />,
+  sinifAnlamadi: <CircleHelp size={17} />,
   ogretmenMesaji: <MessageCircle size={17} />,
 };
 
@@ -25,6 +26,7 @@ export function uyariRengi(u: Pick<UyariBildirimi, 'tur' | 'duygu'>): string {
     case 'kameradaYok':
       return '#9AA6C8';
     case 'sinifOlumsuz':
+    case 'sinifAnlamadi':
       return '#FF6B5E';
     default:
       return '#F1EEFF';
@@ -46,7 +48,7 @@ export function UyariAkisi({ uyarilar, sec, sinir }: { uyarilar: UyariBildirimi[
       <AnimatePresence initial={false}>
         {liste.map((u) => {
           const renk = uyariRengi(u);
-          const sinifGeneli = u.tur === 'sinifOlumsuz' || u.tur === 'sinifDikkat';
+          const sinifGeneli = u.tur === 'sinifOlumsuz' || u.tur === 'sinifDikkat' || u.tur === 'sinifAnlamadi';
           return (
             <motion.li key={u.id} layout initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 28 }}>
               <button

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Area, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from 'recharts';
+import { Area, ComposedChart, Line, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis, type TooltipContentProps } from 'recharts';
 import { DUYGU, YIGIN_SIRASI } from '../../../alan/duygular';
 import type { AkisNoktasi } from './useCanliOturum';
 
@@ -52,7 +52,27 @@ function Ipucu({ active, payload, label }: TooltipContentProps<number, string>) 
   );
 }
 
-export function DuyguAkisi({ akis, yukseklik = 220, pencereMs = 15 * 60_000 }: { akis: AkisNoktasi[]; yukseklik?: number; pencereMs?: number }) {
+export interface GrafikBolumu {
+  ad: string;
+  mola: boolean;
+  baslangicMs: number;
+  bitisMs: number | null;
+}
+
+export function DuyguAkisi({
+  akis,
+  yukseklik = 220,
+  pencereMs = 15 * 60_000,
+  bolumler = [],
+  isaretler = [],
+}: {
+  akis: AkisNoktasi[];
+  yukseklik?: number;
+  pencereMs?: number;
+  bolumler?: GrafikBolumu[];
+  /** Yoklama gibi anlık olaylar için dikey çizgiler. */
+  isaretler?: { zamanMs: number; etiket: string }[];
+}) {
   const veri = useMemo(() => {
     if (akis.length === 0) return [];
     const son = akis[akis.length - 1].t;
@@ -79,6 +99,21 @@ export function DuyguAkisi({ akis, yukseklik = 220, pencereMs = 15 * 60_000 }: {
           <Area key={d} type="monotone" dataKey={d} stackId="1" stroke="none" fill={DUYGU[d].renk} fillOpacity={0.92} isAnimationActive={false} />
         ))}
         <Line type="monotone" dataKey="dikkat" stroke="#F1EEFF" strokeWidth={2} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
+        {bolumler.map((b) => {
+          const bas = Math.max(b.baslangicMs, veri[0].t);
+          const bit = Math.min(b.bitisMs ?? veri[veri.length - 1].t, veri[veri.length - 1].t);
+          if (bit <= bas) return null;
+          return b.mola ? (
+            <ReferenceArea key={`b${b.baslangicMs}`} x1={bas} x2={bit} y1={0} y2={1} fill="#1A1535" fillOpacity={0.85} stroke="none" label={{ value: 'Mola', fill: '#AAA4D1', fontSize: 12 }} />
+          ) : (
+            <ReferenceLine key={`b${b.baslangicMs}`} x={bas} stroke="#F1EEFF" strokeOpacity={0.55} label={{ value: b.ad, position: 'insideTopLeft', fill: '#F1EEFF', fontSize: 11 }} />
+          );
+        })}
+        {isaretler.map((i) =>
+          i.zamanMs >= veri[0].t && i.zamanMs <= veri[veri.length - 1].t ? (
+            <ReferenceLine key={`i${i.zamanMs}`} x={i.zamanMs} stroke="#A784FF" strokeDasharray="2 3" label={{ value: i.etiket, position: 'insideBottomRight', fill: '#A784FF', fontSize: 11 }} />
+          ) : null,
+        )}
       </ComposedChart>
     </ResponsiveContainer>
   );

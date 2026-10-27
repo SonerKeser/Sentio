@@ -24,6 +24,9 @@ public static class ExcelDisaAktarici
         IsiHaritasi(kitap, rapor);
         ZamanCizelgesi(kitap, rapor);
         Uyarilar(kitap, rapor);
+        Bolumler(kitap, rapor);
+        Yoklamalar(kitap, rapor);
+        Sinyaller(kitap, rapor);
         HamVeri(kitap, okumalar, adlar);
 
         using var akis = new MemoryStream();
@@ -205,6 +208,100 @@ public static class ExcelDisaAktarici
         s.Columns().AdjustToContents(8, 90);
     }
 
+    private static void Bolumler(XLWorkbook kitap, Rapor rapor)
+    {
+        var liste = rapor.Etkilesim.Bolumler;
+        if (liste.Count == 0) return;
+        var s = kitap.Worksheets.Add("Bölümler");
+        string[] basliklar = ["Bölüm", "Başlangıç", "Süre (dk)", "Öğrenci", "Baskın ifade", .. Duygular.Hepsi.Select(d => d.Etiket()), "Dikkat", "Olumsuz oran", "Anlamadım", "Söz isteği"];
+        for (var i = 0; i < basliklar.Length; i++) s.Cell(1, 1 + i).Value = basliklar[i];
+        var r = 2;
+        foreach (var b in liste)
+        {
+            s.Cell(r, 1).Value = b.Mola ? $"{b.Ad} (mola)" : b.Ad;
+            s.Cell(r, 2).Value = Yerel(b.BaslangicMs);
+            s.Cell(r, 2).Style.DateFormat.Format = "HH:mm:ss";
+            s.Cell(r, 3).Value = Math.Round((b.BitisMs - b.BaslangicMs) / 60000.0, 1);
+            s.Cell(r, 4).Value = b.Aktif;
+            if (b.Aktif > 0)
+            {
+                var baskin = Duygular.Baskin(b.Dagilim);
+                s.Cell(r, 5).Value = baskin.Etiket();
+                s.Cell(r, 5).Style.Fill.SetBackgroundColor(XLColor.FromHtml(baskin.Renk()));
+                for (var i = 0; i < Duygular.Sayi; i++) s.Cell(r, 6 + i).Value = b.Dagilim[i];
+                s.Cell(r, 6 + Duygular.Sayi).Value = b.Dikkat;
+                s.Cell(r, 7 + Duygular.Sayi).Value = b.OlumsuzOran;
+            }
+            s.Cell(r, 8 + Duygular.Sayi).Value = b.Anlamadim;
+            s.Cell(r, 9 + Duygular.Sayi).Value = b.Soru;
+            r++;
+        }
+        s.Range(1, 1, r - 1, basliklar.Length).CreateTable("Bolumler").Theme = XLTableTheme.TableStyleLight9;
+        s.Range(2, 6, r - 1, 7 + Duygular.Sayi).Style.NumberFormat.Format = "0%";
+        s.Columns().AdjustToContents(8, 40);
+    }
+
+    private static void Yoklamalar(XLWorkbook kitap, Rapor rapor)
+    {
+        var liste = rapor.Etkilesim.Yoklamalar;
+        if (liste.Count == 0) return;
+        var s = kitap.Worksheets.Add("Yoklamalar");
+        var r = 1;
+        foreach (var y in liste)
+        {
+            s.Cell(r, 1).Value = Yerel(y.ZamanMs).ToString("HH:mm", Tr) + "  " + y.Soru;
+            s.Cell(r, 1).Style.Font.SetBold().Font.SetFontSize(12);
+            var ozet = $"{y.Yanitlayan} yanıt / {y.Katilimci} öğrenci";
+            if (y.AnlamaOrani is { } a) ozet += $"  ·  anlama oranı %{Math.Round(a * 100)}";
+            if (y.Ortalama is { } o) ozet += $"  ·  ortalama {o:0.0}";
+            s.Cell(r + 1, 1).Value = ozet;
+            s.Cell(r + 1, 1).Style.Font.SetFontColor(XLColor.Gray);
+            r += 2;
+            for (var i = 0; i < y.Secenekler.Length; i++)
+            {
+                s.Cell(r, 1).Value = y.Secenekler[i];
+                s.Cell(r, 2).Value = y.Sayilar[i];
+                s.Cell(r, 3).Value = y.Yanitlayan > 0 ? y.Sayilar[i] / (double)y.Yanitlayan : 0;
+                s.Cell(r, 3).Style.NumberFormat.Format = "0%";
+                s.Cell(r, 4).FormulaA1 = $"REPT(\"█\",ROUND(C{r}*30,0))";
+                s.Cell(r, 4).Style.Font.SetFontColor(XLColor.FromHtml("#A784FF"));
+                r++;
+            }
+            r++;
+        }
+        s.Column(1).Width = 50;
+        s.Column(4).Width = 34;
+    }
+
+    private static void Sinyaller(XLWorkbook kitap, Rapor rapor)
+    {
+        var liste = rapor.Etkilesim.Sinyaller;
+        if (liste.Count == 0) return;
+        var s = kitap.Worksheets.Add("Öğrenci sinyalleri");
+        string[] basliklar = ["Zaman", "Öğrenci", "Sinyal", "Soru", "Yanıtlandı"];
+        for (var i = 0; i < basliklar.Length; i++) s.Cell(1, 1 + i).Value = basliklar[i];
+        var r = 2;
+        foreach (var x in liste)
+        {
+            s.Cell(r, 1).Value = Yerel(x.ZamanMs);
+            s.Cell(r, 1).Style.DateFormat.Format = "HH:mm:ss";
+            s.Cell(r, 2).Value = x.Ad;
+            s.Cell(r, 3).Value = SinyalAdi(x.Tur);
+            s.Cell(r, 4).Value = x.Metin ?? "";
+            s.Cell(r, 5).Value = x.Tur == SinyalTuru.Soru ? (x.Yanitlandi ? "Evet" : "Hayır") : "";
+            r++;
+        }
+        s.Range(1, 1, r - 1, basliklar.Length).CreateTable("Sinyaller").Theme = XLTableTheme.TableStyleLight9;
+        s.Columns().AdjustToContents(8, 80);
+    }
+
+    public static string SinyalAdi(SinyalTuru tur) => tur switch
+    {
+        SinyalTuru.Anlamadim => "Anlamadım",
+        SinyalTuru.Soru => "Söz istedi",
+        _ => "Yavaşlar mısınız",
+    };
+
     private static void HamVeri(XLWorkbook kitap, IReadOnlyList<Okuma> okumalar, IReadOnlyDictionary<Guid, string> adlar)
     {
         var s = kitap.Worksheets.Add("Ham Veri");
@@ -246,6 +343,7 @@ public static class ExcelDisaAktarici
         UyariTuru.Uyuklama => "Yorgunluk",
         UyariTuru.SinifOlumsuz => "Sınıf geneli olumsuz",
         UyariTuru.SinifDikkat => "Sınıf geneli dikkat",
+        UyariTuru.SinifAnlamadi => "Sınıf geneli anlamadım",
         _ => "Öğretmen mesajı",
     };
 

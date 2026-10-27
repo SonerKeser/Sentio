@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // Sunucudan yüklenen Sezgi arayüzü bu dört işlevi görür.
 contextBridge.exposeInMainWorld('sezgiMasaustu', {
-  surum: '1.0.0',
+  surum: '1.1.0',
   durtme: (bilgi) => ipcRenderer.send('masaustu:durtme', { baslik: String(bilgi?.baslik ?? ''), metin: String(bilgi?.metin ?? '') }),
   durum: (bilgi) => ipcRenderer.send('masaustu:durum', { metin: String(bilgi?.metin ?? ''), aktif: !!bilgi?.aktif }),
   sunucuDegistir: () => ipcRenderer.send('masaustu:sunucu-degistir'),

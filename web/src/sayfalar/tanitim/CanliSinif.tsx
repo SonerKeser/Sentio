@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Frown, Send } from 'lucide-react';
+import { Frown, Hand, Send } from 'lucide-react';
 import { DUYGU, DUYGULAR, YIGIN_SIRASI, type Duygu } from '../../alan/duygular';
 import { Maskot } from '../../bilesenler/Maskot';
 import { sinif } from '../../bilesenler/ui';
@@ -45,7 +45,7 @@ export function CanliSinif({ kucuk = false }: { kucuk?: boolean }) {
     OGRENCILER.slice(0, sayi).map((ad, i) => ({ ad, duygu: i % 4 === 1 ? 'mutlu' : 'notr', dikkat: 0.7 + Math.random() * 0.25, uyari: false })),
   );
   const [uyandi, setUyandi] = useState(!!azHareket);
-  const [uyari, setUyari] = useState<{ ad: string; asama: 'uyari' | 'durtme' } | null>(null);
+  const [uyari, setUyari] = useState<{ ad: string; asama: 'uyari' | 'durtme' | 'soz' } | null>(null);
   // Şerit ilk açılışta boş görünmesin: başlangıç sınıfının dağılımı hafif dalgalanmalarla doldurulur.
   const [gecmis, setGecmis] = useState<number[][]>(() =>
     Array.from({ length: ORNEK_UZUNLUGU }, (_, j) => {
@@ -86,6 +86,7 @@ export function CanliSinif({ kucuk = false }: { kucuk?: boolean }) {
       if (evre === 4 && hedef >= 0) setUyari({ ad: OGRENCILER[hedef], asama: 'uyari' });
       else if (evre === 6) setUyari((u) => (u ? { ...u, asama: 'durtme' } : u));
       else if (evre === 8) setUyari(null);
+      else if (evre === 0) setUyari({ ad: OGRENCILER[(s.tik / 10) % sayi | 0], asama: 'soz' });
     }, 1400);
     return () => clearInterval(z);
   }, [azHareket, uyandi, sayi]);
@@ -140,10 +141,14 @@ export function CanliSinif({ kucuk = false }: { kucuk?: boolean }) {
             className="absolute -bottom-6 right-4 flex max-w-[300px] items-start gap-3 rounded-2xl border border-cizgi bg-gece-3/95 p-3 text-sm shadow-2xl backdrop-blur sm:-right-6"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full" style={{ background: `${uyari.asama === 'uyari' ? DUYGU.uzgun.renk : DUYGU.mutlu.renk}26`, color: uyari.asama === 'uyari' ? DUYGU.uzgun.renk : DUYGU.mutlu.renk }}>
-              {uyari.asama === 'uyari' ? <Frown size={17} /> : <Send size={16} />}
+              {uyari.asama === 'uyari' ? <Frown size={17} /> : uyari.asama === 'soz' ? <Hand size={16} /> : <Send size={16} />}
             </span>
             <span className="leading-snug">
-              {uyari.asama === 'uyari' ? `${uyari.ad} yaklaşık 20 sn'dir üzgün görünüyor.` : `${uyari.ad} için destek mesajı gönderildi: “Takıldığın bir yer varsa sormaktan çekinme.”`}
+              {uyari.asama === 'uyari'
+                ? `${uyari.ad} yaklaşık 20 sn'dir üzgün görünüyor.`
+                : uyari.asama === 'soz'
+                  ? `${uyari.ad} söz istiyor: “Bir örnek daha çözebilir miyiz?”`
+                  : `${uyari.ad} için destek mesajı gönderildi: “Takıldığın bir yer varsa sormaktan çekinme.”`}
             </span>
           </motion.div>
         )}

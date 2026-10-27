@@ -34,7 +34,8 @@ Video konferansla verilen derste öğretmen, küçük kamera karelerinden kimin 
 - Öğrenci derse **altı karakterlik bir kodla** tarayıcıdan ya da Sezgi Masaüstü uygulamasından katılır ve açık rıza verir.
 - Kamerası **kendi cihazında** çözümlenir: yüz bulma, 468 noktalı yüz ağı, iris ve yedi sınıflı ifade modeli tarayıcıda, ekran kartında çalışır. **Görüntü hiçbir yere gönderilmez.**
 - Öğretmenin paneline saniyede bir yalnızca sayılar akar. Sezgi kısa dalgalanmaları süzer; bir öğrencinin ifadesi belirlenen süre boyunca olumsuz kalırsa, dikkati dağılırsa, yorgun görünürse ya da sınıfın büyük kısmı zorlanıyorsa **uyarı** düşer ve öğrenciye nazik bir **destek bildirimi** gider.
-- Ders bitince **ısı haritası**, öne çıkan anlar ve öğrenci özetleriyle bir **rapor** hazırdır; Excel ve CSV olarak indirilir.
+- Yüz ifadesi tek başına yetmediği için öğrenci **"Anlamadım"** diyebilir, **söz isteyebilir**, **"Yavaşlar mısınız?"** diyebilir; öğretmen tek dokunuşla **yoklama** açar, dersi **bölümlere** ayırır, **mola** verir.
+- Ders bitince bölüm bölüm ölçümler, yoklama sonuçları, **ısı haritası** ve öğrenci özetleriyle bir **rapor** hazırdır; Excel, CSV ve PDF olarak alınır. **Dönem analitiği** bir sınıfın dersler boyunca seyrini gösterir.
 
 Bu proje, eski bir akademik denemenin ([EmotionDedect](docs/ESKI-SISTEM-ANALIZI.md)) fikrini sıfırdan, çalışan ve gizliliği önceleyen bir sisteme dönüştürür.
 
@@ -47,11 +48,22 @@ Bu proje, eski bir akademik denemenin ([EmotionDedect](docs/ESKI-SISTEM-ANALIZI.
 | ![Rapor](docs/gorseller/rapor.jpg) | ![Destek bildirimi](docs/gorseller/ogrenci-bildirim.jpg) |
 | **Öğrenci × zaman ısı haritası** | **Açık rıza** |
 | ![Isı haritası](docs/gorseller/rapor-isi-haritasi.jpg) | ![Açık rıza ekranı](docs/gorseller/ogrenci-riza.jpg) |
+| **Sınıfın sesi: yoklama ve söz istekleri** | **Öğrencide yoklama** |
+| ![Sınıfın sesi paneli](docs/gorseller/panel-etkilesim.jpg) | ![Öğrenci yoklama kartı](docs/gorseller/ogrenci-yoklama.jpg) |
+| **Bölümler ve yoklama sonuçları** | **Dönem analitiği** |
+| ![Rapor bölümleri](docs/gorseller/rapor-bolumler.jpg) | ![Analitik](docs/gorseller/analitik.jpg) |
+| **Öğrencide mola** | **İndirme sayfası** |
+| ![Mola ekranı](docs/gorseller/ogrenci-mola.jpg) | ![İndirme sayfası](docs/gorseller/tanitim-indir.jpg) |
 
 ## Öne çıkanlar
 
 - **Gizlilik tasarımın merkezinde:** görüntü cihazdan çıkmaz, yüz tanıma yapılmaz, açık rıza ekranı, öğrencinin istediği an duraklatabilmesi, anonim mod, otomatik veri silme.
 - **Zamana dayalı kural motoru:** üstel yumuşatma, kopma toleransı, kalıcılık eşiği ve bekleme süresi; öğrenci ve sınıf geneli kurallar. Ayarlar ders sürerken değiştirilebilir.
+- **Sınıfın sesi:** "Anlamadım", söz isteme ve "Yavaşlar mısınız?" sinyalleri; anlama, evet/hayır, çoktan seçmeli ve puan yoklamaları canlı sonuçlarla. Öğrencilerin %30'u anlamadığını belirtirse öğretmene uyarı düşer.
+- **Ders akışı:** bölümler grafikte bant olarak görünür, rapor her bölümü ayrı değerlendirir; mola boyunca kameralar kapanır, süre dolunca ders kaldığı yerden sürer.
+- **Dönem analitiği:** sınıf bazında dersler arası katılım, dikkat ve anlama eğilimi; gözden geçirilecek dersler; ilgi bekleyen öğrenciler.
+- **Öğrenci hakları:** ders sonunda yalnızca öğrencinin cihazında hesaplanan kişisel özet; ayrılırken "verilerimi sil" seçeneği.
+- **Yönetim:** sunucu durum kartı, tek tıkla tutarlı veritabanı yedeği, arka planda masaüstü bildirimi ve sesli uyarı.
 - **Galeri analizi:** öğrenciler hiçbir şey kuramıyorsa Zoom, Meet ya da Teams penceresini paylaşın; galerideki yüzler döşemeli taramayla bulunur, galeri düzeni değişse de izlenir.
 - **Sanal sınıf:** öğrenci olmadan paneli denemek ve tanıtmak için mizaç sahibi sanal öğrenciler; ölçümleri gerçek öğrencilerle aynı hattan geçer.
 - **Kendi kendine yeten sunucu:** tek dosya, kurulum yok, internet gerekmez; modeller ve arayüz içinde. Yerel ağda kendini duyurur, masaüstü uygulaması onu kendiliğinden bulur.

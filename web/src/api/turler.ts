@@ -3,7 +3,9 @@ import type { Duygu } from '../alan/duygular';
 
 export type OturumDurumu = 'canli' | 'bitti';
 export type KatilimciKaynagi = 'kamera' | 'galeri' | 'simulasyon';
-export type KatilimciDurumu = 'aktif' | 'duraklatildi' | 'bekliyor' | 'cevrimdisi' | 'ayrildi';
+export type KatilimciDurumu = 'aktif' | 'duraklatildi' | 'bekliyor' | 'cevrimdisi' | 'ayrildi' | 'molada';
+export type SinyalTuru = 'anlamadim' | 'soru' | 'yavasla';
+export type YoklamaTuru = 'anlama' | 'evetHayir' | 'coktan' | 'puan';
 export type UyariTuru =
   | 'olumsuzIfade'
   | 'dikkatDagildi'
@@ -11,6 +13,7 @@ export type UyariTuru =
   | 'uyuklama'
   | 'sinifOlumsuz'
   | 'sinifDikkat'
+  | 'sinifAnlamadi'
   | 'ogretmenMesaji';
 
 export interface OgretmenBilgisi {
@@ -126,6 +129,7 @@ export interface KatilimciAnligi {
   uyariDuygusu: Duygu | null;
   uyariSayisi: number;
   disKimlik: string | null;
+  sinyal: SinyalTuru | null;
 }
 
 export interface SinifOzeti {
@@ -144,6 +148,117 @@ export interface AnlikGoruntu {
   zamanMs: number;
   sinif: SinifOzeti;
   katilimcilar: KatilimciAnligi[];
+  etkilesim: EtkilesimDurumu;
+}
+
+// Etkileşim
+
+export interface SinyalBildirimi {
+  id: number;
+  katilimciId: string;
+  ad: string;
+  tur: SinyalTuru;
+  metin: string | null;
+  zamanMs: number;
+}
+
+export interface YoklamaDurumu {
+  id: string;
+  tur: YoklamaTuru;
+  soru: string;
+  secenekler: string[];
+  sayilar: number[];
+  yanitlayan: number;
+  baslangicMs: number;
+}
+
+export interface BolumDurumu {
+  id: number;
+  ad: string;
+  mola: boolean;
+  baslangicMs: number;
+  bitisMs: number | null;
+  molaBitisMs: number | null;
+}
+
+export interface EtkilesimDurumu {
+  sorular: SinyalBildirimi[];
+  anlamadim: number;
+  yavasla: number;
+  yoklama: YoklamaDurumu | null;
+  bolum: BolumDurumu | null;
+  bolumler: BolumDurumu[];
+}
+
+export interface YoklamaBildirimi {
+  id: string;
+  tur: YoklamaTuru;
+  soru: string;
+  secenekler: string[];
+  secim: number | null;
+}
+
+export interface MolaBildirimi {
+  bitisMs: number;
+}
+
+export interface OgrenciDurumu {
+  ayarlar: OgrenciAyarlari;
+  yoklama: YoklamaBildirimi | null;
+  mola: MolaBildirimi | null;
+  acikSinyaller: SinyalTuru[];
+}
+
+export interface SunucuDurumu {
+  surum: string;
+  calismaSuresiSn: number;
+  canliDers: number;
+  cevrimiciOgrenci: number;
+  veritabaniBayt: number;
+  ogretmenSayisi: number;
+  dersSayisi: number;
+  olcumSayisi: number;
+}
+
+// Dönem analitiği
+
+export interface AnalitikDers {
+  id: string;
+  baslik: string;
+  sinifAdi: string | null;
+  tarih: string;
+  sureSn: number;
+  katilimciSayisi: number;
+  dikkat: number;
+  katilim: number;
+  valans: number;
+  olumsuzOran: number;
+  dagilim: number[];
+  anlamaOrani: number | null;
+  uyariSayisi: number;
+  anlamadimSayisi: number;
+  soruSayisi: number;
+}
+
+export interface AnalitikOgrenci {
+  ad: string;
+  dersSayisi: number;
+  dikkat: number;
+  katilim: number;
+  valans: number;
+  yuzOrani: number;
+  baskin: Duygu | null;
+  uyariSayisi: number;
+  anlamadimSayisi: number;
+  egilim: { oturumId: string; katilim: number; dikkat: number }[];
+}
+
+export interface Analitik {
+  siniflar: { ad: string | null; dersSayisi: number }[];
+  seciliSinif: string | null;
+  ozet: { dersSayisi: number; toplamSureSn: number; dikkat: number; katilim: number; anlamaOrani: number | null; ogrenciSayisi: number };
+  dersler: AnalitikDers[];
+  ogrenciler: AnalitikOgrenci[];
 }
 
 export interface UyariBildirimi {
@@ -193,6 +308,45 @@ export interface RaporKatilimci {
   valans: number;
   katilim: number;
   uyariSayisi: number;
+  anlamadimSayisi: number;
+  soruSayisi: number;
+}
+
+export interface RaporBolum {
+  id: number;
+  ad: string;
+  mola: boolean;
+  baslangicMs: number;
+  bitisMs: number;
+  aktif: number;
+  dagilim: number[];
+  dikkat: number;
+  olumsuzOran: number;
+  anlamadim: number;
+  soru: number;
+}
+
+export interface RaporYoklama {
+  id: string;
+  tur: YoklamaTuru;
+  soru: string;
+  secenekler: string[];
+  sayilar: number[];
+  yanitlayan: number;
+  katilimci: number;
+  zamanMs: number;
+  anlamaOrani: number | null;
+  ortalama: number | null;
+}
+
+export interface RaporSinyal {
+  id: number;
+  katilimciId: string;
+  ad: string;
+  tur: SinyalTuru;
+  metin: string | null;
+  zamanMs: number;
+  yanitlandi: boolean;
 }
 
 export interface RaporDilim {
@@ -235,4 +389,13 @@ export interface Rapor {
   };
   onemliAnlar: { zamanMs: number; tur: 'olumsuz' | 'olumlu' | 'dikkat'; aciklama: string; deger: number }[];
   uyarilar: UyariBildirimi[];
+  etkilesim: {
+    bolumler: RaporBolum[];
+    yoklamalar: RaporYoklama[];
+    sinyaller: RaporSinyal[];
+    anlamadim: number;
+    soru: number;
+    yavasla: number;
+    anlamaOrani: number | null;
+  };
 }

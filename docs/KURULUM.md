@@ -85,7 +85,7 @@ Her ayar ortam değişkeniyle de verilebilir: `Sezgi__VeriSaklamaGun=90`.
 
 ## 6. Yedekleme ve güncelleme
 
-Sunucuyu durdurup `veri` klasörünü kopyalamak yeterlidir. Yeni sürümde paket içeriğini aynı klasöre açın (`veri` ve `appsettings.json` korunur); veritabanı göçleri açılışta kendiliğinden uygulanır.
+Yönetici hesabıyla **Ayarlar → Sunucu → Yedek indir** düğmesi, sunucu çalışırken tutarlı bir SQLite kopyası indirir (`/api/yonetim/yedek`). Geri yüklemek için sunucuyu durdurup `veri/sezgi.db` dosyasını yedekle değiştirin. Alternatif olarak sunucuyu durdurup `veri` klasörünü kopyalamak da yeterlidir. Yeni sürümde paket içeriğini aynı klasöre açın (`veri` ve `appsettings.json` korunur); veritabanı göçleri açılışta kendiliğinden uygulanır.
 
 ## 7. Geliştirme
 

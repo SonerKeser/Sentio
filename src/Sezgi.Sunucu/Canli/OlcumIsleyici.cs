@@ -25,6 +25,8 @@ public sealed class OlcumIsleyici(
 
     public async Task IsleAsync(CanliOturum oturum, CanliKatilimci katilimci, OkumaGirdisi girdi)
     {
+        // Molada kameralar kapalıdır; gecikmeli gelen ölçümler de işlenmez.
+        if (oturum.MoladaMi) return;
         var olasiliklar = Duygular.Normallestir(girdi.D);
         if (olasiliklar is null) return;
         var dikkat = Sinirla(girdi.Dikkat);
@@ -135,6 +137,7 @@ public sealed class OlcumIsleyici(
         UyariTuru.Uyuklama => "uyuklama",
         UyariTuru.SinifOlumsuz => "sinifOlumsuz",
         UyariTuru.SinifDikkat => "sinifDikkat",
+        UyariTuru.SinifAnlamadi => "sinifAnlamadi",
         _ => "ogretmenMesaji",
     };
 

@@ -1,7 +1,7 @@
 {
   "name": "sezgi-masaustu",
   "productName": "Sezgi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Sezgi masaüstü istemcisi: öğrenci ve öğretmen bilgisayarları için",
   "author": "Soner Keser",
   "license": "MIT",

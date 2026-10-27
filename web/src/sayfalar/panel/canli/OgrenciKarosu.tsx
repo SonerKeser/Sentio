@@ -5,6 +5,7 @@ import { DUYGU } from '../../../alan/duygular';
 import type { KatilimciAnligi } from '../../../api/turler';
 import { Maskot, type MaskotDurumu } from '../../../bilesenler/Maskot';
 import { Kivilcim, sinif, TayfCubugu } from '../../../bilesenler/ui';
+import { SINYAL_ADI, SINYAL_SIMGESI } from './EtkilesimPaneli';
 
 export const KAYNAK_SIMGESI = {
   kamera: <Video size={13} />,
@@ -15,7 +16,7 @@ export const KAYNAK_SIMGESI = {
 export const KAYNAK_ADI = { kamera: 'Sezgi istemcisi', galeri: 'Galeri analizi', simulasyon: 'Sanal öğrenci' };
 
 export function maskotDurumu(k: KatilimciAnligi): MaskotDurumu {
-  if (k.durum === 'duraklatildi') return 'duraklatildi';
+  if (k.durum === 'duraklatildi' || k.durum === 'molada') return 'duraklatildi';
   if (k.durum !== 'aktif' || !k.yuz) return 'yok';
   if (k.goz < 0.25) return 'uykulu';
   return 'aktif';
@@ -31,6 +32,8 @@ export function durumMetni(k: KatilimciAnligi): string {
       return 'Bağlı değil';
     case 'ayrildi':
       return 'Ayrıldı';
+    case 'molada':
+      return 'Molada';
   }
   if (!k.yuz) return 'Kamerada yok';
   if (k.goz < 0.25) return 'Gözleri kapalı';
@@ -71,6 +74,15 @@ export const OgrenciKarosu = memo(function OgrenciKarosu({ k, sec }: { k: Katili
             <span className={aktif ? 'text-soluk' : 'text-silik'}>{durumMetni(k)}</span>
           </div>
         </div>
+        {k.sinyal && (
+          <span
+            className={sinif('grid h-7 w-7 shrink-0 place-items-center rounded-full', k.sinyal === 'soru' ? 'bg-gunes text-gece' : 'bg-d-ofkeli/20 text-d-ofkeli')}
+            title={SINYAL_ADI[k.sinyal]}
+            aria-label={SINYAL_ADI[k.sinyal]}
+          >
+            {SINYAL_SIMGESI[k.sinyal]}
+          </span>
+        )}
         {aktif && (
           <span className="rakam text-xl font-semibold" title="Dikkat">
             {Math.round(k.dikkat * 100)}

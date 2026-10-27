@@ -8,6 +8,8 @@ import { Maskot } from '../../bilesenler/Maskot';
 import { Logo } from '../../bilesenler/marka';
 import { Alan, Dugme, sinif } from '../../bilesenler/ui';
 import { DersEkrani } from './DersEkrani';
+import { DersOzetiKarti } from './DersOzetiKarti';
+import type { DersOzeti } from './ozet';
 
 const ANAHTAR = 'sezgi.katilim';
 
@@ -17,7 +19,11 @@ interface Basvuru {
   onizleme: KatilimOnizleme;
 }
 
-type Adim = { tur: 'form' } | { tur: 'onay'; basvuru: Basvuru } | { tur: 'ders'; katilim: KatilimYaniti } | { tur: 'veda'; neden: 'ayrildi' | 'bitti' };
+type Adim =
+  | { tur: 'form' }
+  | { tur: 'onay'; basvuru: Basvuru }
+  | { tur: 'ders'; katilim: KatilimYaniti }
+  | { tur: 'veda'; neden: 'ayrildi' | 'bitti'; ozet?: DersOzeti; kendiniGor: boolean };
 
 function kayitliKatilim(): KatilimYaniti | null {
   try {
@@ -46,9 +52,10 @@ export default function OgrenciUygulamasi() {
       });
   }, []);
 
-  const bitir = (neden: 'ayrildi' | 'bitti') => {
+  const bitir = (neden: 'ayrildi' | 'bitti', ozet?: DersOzeti) => {
     sessionStorage.removeItem(ANAHTAR);
-    setAdim({ tur: 'veda', neden });
+    const kendiniGor = adim?.tur === 'ders' ? adim.katilim.ayarlar.ogrenciKendiniGorsun : true;
+    setAdim({ tur: 'veda', neden, ozet, kendiniGor });
   };
 
   if (!adim) return <div className="min-h-dvh" />;
@@ -79,7 +86,7 @@ export default function OgrenciUygulamasi() {
       )}
       {adim.tur === 'veda' && (
         <Sahne key="veda">
-          <Veda neden={adim.neden} yeniden={() => setAdim({ tur: 'form' })} />
+          <Veda neden={adim.neden} ozet={adim.kendiniGor ? adim.ozet : undefined} silindi={adim.ozet?.verilerSilindi ?? false} yeniden={() => setAdim({ tur: 'form' })} />
         </Sahne>
       )}
     </AnimatePresence>
@@ -249,13 +256,17 @@ function OnayEkrani({ basvuru, katildi, vazgec }: { basvuru: Basvuru; katildi: (
   );
 }
 
-function Veda({ neden, yeniden }: { neden: 'ayrildi' | 'bitti'; yeniden: () => void }) {
+function Veda({ neden, ozet, silindi, yeniden }: { neden: 'ayrildi' | 'bitti'; ozet?: DersOzeti; silindi: boolean; yeniden: () => void }) {
   const git = useNavigate();
+  const gosterilecek = ozet && ozet.yuzlu >= 10;
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-      <Maskot duygu="mutlu" boyut={220} />
+      {!gosterilecek && <Maskot duygu="mutlu" boyut={200} />}
       <h1 className="text-4xl font-bold">{neden === 'bitti' ? 'Ders bitti' : 'Dersten ayrıldın'}</h1>
-      <p className="max-w-md text-lg text-soluk">Kameran kapatıldı ve bağlantı sonlandırıldı. Katıldığın için teşekkürler.</p>
+      <p className="max-w-md text-lg text-soluk">
+        Kameran kapatıldı ve bağlantı sonlandırıldı.{silindi ? ' Bu dersteki verilerin sunucudan silindi.' : ''} Katıldığın için teşekkürler.
+      </p>
+      {gosterilecek && <DersOzetiKarti ozet={ozet} />}
       <div className="flex gap-3">
         <Dugme tur="ikincil" onClick={yeniden}>
           Başka bir derse katıl

@@ -2,13 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { HubConnectionState } from '@microsoft/signalr';
-import { BarChart3, Bot, ChevronLeft, MonitorPlay, QrCode, Send, SlidersHorizontal, Square, Users, WifiOff } from 'lucide-react';
+import { BarChart3, Bell, BellOff, Bot, ChevronLeft, MonitorPlay, QrCode, Send, SlidersHorizontal, Square, Users, WifiOff } from 'lucide-react';
 import { DUYGU, yuzde } from '../../alan/duygular';
 import { useGaleriAnalizi } from '../../analiz/galeri';
 import { api, hataMesaji } from '../../api/istemci';
-import type { GaleriOkumasi, KatilimciAnligi } from '../../api/turler';
+import type { GaleriOkumasi, KatilimciAnligi, SinyalTuru, YoklamaTuru } from '../../api/turler';
 import { Maskot } from '../../bilesenler/Maskot';
-import { Donen, Dugme, Halka, Pencere, sinif, sureYaz, TayfCubugu, useBildirim, useZamanlayici } from '../../bilesenler/ui';
+import { Donen, Dugme, Halka, Pencere, sinif, sureYaz, TayfCubugu, useBildirim, useKalici, useZamanlayici } from '../../bilesenler/ui';
+import { bildirimIzniIste, useOgretmenBildirimleri } from './canli/bildirimler';
+import { DersAkisiSeridi } from './canli/DersAkisiSeridi';
+import { EtkilesimPaneli } from './canli/EtkilesimPaneli';
 import { DuyguAkisi, Gosterge } from './canli/DuyguAkisi';
 import { GaleriBolumu } from './canli/GaleriBolumu';
 import { OgrenciKarosu } from './canli/OgrenciKarosu';
@@ -32,7 +35,28 @@ export default function CanliPanel() {
   const [simulasyon, setSimulasyon] = useState(false);
   const [bitirOnayi, setBitirOnayi] = useState(false);
   const [galeriAcik, setGaleriAcik] = useState(false);
+  const [bildirimAcik, setBildirimAcik] = useKalici('sezgi.bildirimler', false);
   const simdi = useZamanlayici(1000);
+  useOgretmenBildirimleri(bildirimAcik, uyarilar, anlik?.etkilesim.sorular ?? []);
+
+  /** Hub çağrısı; hata kullanıcıya anlaşılır bir mesajla gösterilir. */
+  const cagir = async (yontem: string, ...argumanlar: unknown[]) => {
+    try {
+      return await hub.current?.invoke(yontem, id, ...argumanlar);
+    } catch (e) {
+      bildir(hataMesaji(e), 'hata');
+    }
+  };
+
+  const bildirimDegistir = async () => {
+    if (bildirimAcik) {
+      setBildirimAcik(false);
+      return;
+    }
+    const izin = await bildirimIzniIste();
+    setBildirimAcik(true);
+    bildir(izin ? 'Sezgi arka plandayken uyarılar ve söz istekleri bildirilecek.' : 'Sistem bildirimine izin verilmedi; yalnızca sesli uyarı çalınacak.', 'bilgi');
+  };
 
   const galeriGonder = useCallback(
     (okumalar: GaleriOkumasi[]) => {
@@ -148,6 +172,14 @@ export default function CanliPanel() {
             <Dugme simge={<Bot size={17} />} onClick={() => setSimulasyon(true)}>
               {oturum.simulasyonCalisiyor ? 'Sanal sınıf açık' : 'Sanal sınıf'}
             </Dugme>
+            <Dugme
+              tur="hayalet"
+              simge={bildirimAcik ? <Bell size={17} /> : <BellOff size={17} />}
+              onClick={bildirimDegistir}
+              aria-label={bildirimAcik ? 'Bildirimleri kapat' : 'Arka planda bildirim al'}
+              title={bildirimAcik ? 'Bildirimler açık' : 'Arka planda bildirim al'}
+              className={bildirimAcik ? 'text-gunes' : undefined}
+            />
             <Dugme tur="hayalet" simge={<SlidersHorizontal size={17} />} onClick={() => setAyarlar(true)} aria-label="Ders ayarları" />
             <Dugme tur="tehlike" simge={<Square size={15} />} onClick={() => setBitirOnayi(true)}>
               Dersi bitir
@@ -158,6 +190,16 @@ export default function CanliPanel() {
 
       <AnimatePresence>{galeriAcik && !bitti && <GaleriBolumu {...galeri} />}</AnimatePresence>
 
+      {!bitti && (
+        <DersAkisiSeridi
+          etkilesim={anlik?.etkilesim}
+          simdi={simdi}
+          bolumBaslat={async (ad) => void (await cagir('BolumBaslat', ad))}
+          molaBaslat={async (dk) => void (await cagir('MolaBaslat', dk))}
+          molaBitir={async () => void (await cagir('MolaBitir'))}
+        />
+      )}
+
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex min-w-0 flex-col gap-5">
           {/* Sınıfın nabzı */}
@@ -166,7 +208,7 @@ export default function CanliPanel() {
               <Maskot duygu={s?.baskin ?? 'notr'} durum={s && s.aktif > 0 ? 'aktif' : 'yok'} boyut={128} etiket="Sınıfın baskın ifadesi" />
               <div>
                 <p className="text-sm text-soluk">Sınıfın havası</p>
-                <p className="text-3xl font-bold baslik">{s?.baskin && s.aktif > 0 ? DUYGU[s.baskin].ad : 'Bekleniyor'}</p>
+                <p className="text-3xl font-bold baslik">{s?.baskin && s.aktif > 0 ? DUYGU[s.baskin].ad : anlik?.etkilesim.bolum?.mola ? 'Molada' : 'Bekleniyor'}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-soluk">
                   <Users size={15} />
                   <span className="rakam">{s?.aktif ?? 0}</span> aktif / {s?.toplam ?? 0} katılımcı
@@ -189,7 +231,7 @@ export default function CanliPanel() {
               <h2 className="text-lg font-semibold">Son 15 dakika</h2>
               <Gosterge />
             </div>
-            <DuyguAkisi akis={akis} />
+            <DuyguAkisi akis={akis} bolumler={anlik?.etkilesim.bolumler} />
           </section>
 
           {/* Öğrenciler */}
@@ -227,7 +269,19 @@ export default function CanliPanel() {
         </div>
 
         {/* Sağ sütun: uyarılar ve sınıfa mesaj */}
-        <aside className="flex flex-col gap-5 xl:sticky xl:top-5 xl:max-h-[calc(100dvh-2.5rem)]">
+        <aside className="kaydirma-ince flex flex-col gap-5 xl:sticky xl:top-5 xl:max-h-[calc(100dvh-2.5rem)] xl:overflow-y-auto">
+          {!bitti && (
+            <EtkilesimPaneli
+              etkilesim={anlik?.etkilesim}
+              aktifOgrenci={s?.aktif ?? 0}
+              simdi={simdi}
+              molada={anlik?.etkilesim.bolum?.mola ?? false}
+              yoklamaBaslat={async (tur: YoklamaTuru, soru: string, secenekler: string[]) => void (await cagir('YoklamaBaslat', { tur, soru, secenekler }))}
+              yoklamaKapat={async () => void (await cagir('YoklamaKapat'))}
+              soruYanitla={async (sinyalId: number) => void (await cagir('SinyalYanitla', sinyalId))}
+              sinyalleriTemizle={async (tur: SinyalTuru) => void (await cagir('SinyalleriTemizle', tur))}
+            />
+          )}
           {!bitti && <SinifaMesaj gonder={(m) => mesajGonder(null, m)} />}
           <section className="yuzey flex flex-col p-4 xl:min-h-0 xl:flex-1">
             <h2 className="mb-3 flex items-center justify-between text-lg font-semibold">

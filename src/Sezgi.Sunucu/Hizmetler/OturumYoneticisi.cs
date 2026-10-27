@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Sezgi.Sunucu.Canli;
 using Sezgi.Sunucu.Guvenlik;
 using Sezgi.Sunucu.Hublar;
+using Sezgi.Sunucu.Raporlar;
 using Sezgi.Sunucu.Veri;
 
 namespace Sezgi.Sunucu.Hizmetler;
@@ -14,8 +15,13 @@ public sealed class OturumYoneticisi(
     IDbContextFactory<SezgiVeritabani> fabrika,
     IHubContext<OgretmenHub> ogretmenHub,
     IHubContext<OgrenciHub> ogrenciHub,
-    SimulasyonYoneticisi simulasyon)
+    SimulasyonYoneticisi simulasyon,
+    EtkilesimYoneticisi etkilesim,
+    IServiceScopeFactory kapsamlar,
+    ILogger<OturumYoneticisi> gunluk)
 {
+    public const string SilinmisAd = "Silinmiş katılımcı";
+
     /// <summary>Karışabilecek karakterler (0/O, 1/I/L) çıkarılmış alfabe.</summary>
     private const string KodAlfabesi = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
@@ -64,15 +70,49 @@ public sealed class OturumYoneticisi(
             katilimci.Ad, OgrenciAyarlari(oturum.Ayarlar));
     }
 
-    public async Task KatilimciAyrildiAsync(CanliOturum oturum, CanliKatilimci katilimci)
+    public async Task KatilimciAyrildiAsync(CanliOturum oturum, CanliKatilimci katilimci, bool verileriSil = false)
     {
         lock (katilimci.Kilit) katilimci.Ayrildi = true;
-        await using var db = await fabrika.CreateDbContextAsync();
-        var kayit = await db.Katilimcilar.FindAsync(katilimci.Id);
-        if (kayit is null) return;
-        kayit.AyrilmaZamani = DateTime.UtcNow;
-        if (kayit.JetonOzeti is not null) depo.JetonuIptalEt(kayit.JetonOzeti);
-        await db.SaveChangesAsync();
+        await etkilesim.SinyalGeriAlAsync(oturum, katilimci.Id, SinyalTuru.Soru);
+        await using (var db = await fabrika.CreateDbContextAsync())
+        {
+            var kayit = await db.Katilimcilar.FindAsync(katilimci.Id);
+            if (kayit is null) return;
+            kayit.AyrilmaZamani = DateTime.UtcNow;
+            if (kayit.JetonOzeti is not null) depo.JetonuIptalEt(kayit.JetonOzeti);
+            if (verileriSil)
+            {
+                kayit.Ad = SilinmisAd;
+                kayit.JetonOzeti = null;
+            }
+            await db.SaveChangesAsync();
+        }
+        if (!verileriSil) return;
+
+        lock (katilimci.Kilit) katilimci.Ad = SilinmisAd;
+        oturum.UyarilariKaldir(katilimci.Id);
+        oturum.AktifYoklama?.Yanitlar.TryRemove(katilimci.Id, out _);
+        lock (oturum.EtkilesimKilidi) oturum.Sinyaller.RemoveAll(s => s.KatilimciId == katilimci.Id);
+        await KatilimciVerileriniSilAsync(katilimci.Id);
+        // Toplu yazıcı kuyruğunda bekleyen son ölçümler de yazıldıktan sonra temizlensin.
+        _ = Task.Delay(TimeSpan.FromSeconds(3)).ContinueWith(_ => KatilimciVerileriniSilAsync(katilimci.Id), TaskScheduler.Default);
+    }
+
+    private async Task KatilimciVerileriniSilAsync(Guid katilimciId)
+    {
+        try
+        {
+            await using var db = await fabrika.CreateDbContextAsync();
+            await db.Okumalar.Where(o => o.KatilimciId == katilimciId).ExecuteDeleteAsync();
+            await db.Uyarilar.Where(u => u.KatilimciId == katilimciId).ExecuteDeleteAsync();
+            await db.Sinyaller.Where(s => s.KatilimciId == katilimciId).ExecuteDeleteAsync();
+            await db.YoklamaYanitlari.Where(y => y.KatilimciId == katilimciId).ExecuteDeleteAsync();
+            await db.KatilimciIstatistikleri.Where(k => k.KatilimciId == katilimciId).ExecuteDeleteAsync();
+        }
+        catch (Exception ex)
+        {
+            gunluk.LogError(ex, "Katılımcı {Katilimci} verileri silinemedi.", katilimciId);
+        }
     }
 
     public async Task<OturumAyarlari?> AyarlariGuncelleAsync(Guid oturumId, OturumAyarlari yeni)
@@ -96,6 +136,7 @@ public sealed class OturumYoneticisi(
     public async Task<bool> BitirAsync(Guid oturumId)
     {
         await simulasyon.DurdurAsync(oturumId);
+        if (depo.Bul(oturumId) is { } acik) await etkilesim.KapatAsync(acik);
         await using var db = await fabrika.CreateDbContextAsync();
         var oturum = await db.Oturumlar.FindAsync(oturumId);
         if (oturum is null) return false;
@@ -114,7 +155,22 @@ public sealed class OturumYoneticisi(
             await ogrenciHub.Clients.Group(OgrenciHub.OturumGrubu(oturumId)).SendAsync("OturumBitti");
             await ogretmenHub.Clients.Group(OgretmenHub.Grup(oturumId)).SendAsync("OturumBitti", Detay(canli, OturumDurumu.Bitti, oturum.BitisZamani));
         }
+        await IstatistikleriKaydetAsync(oturumId);
         return true;
+    }
+
+    /// <summary>Dönem analitiği için dersin özetini hesaplayıp saklar.</summary>
+    public async Task IstatistikleriKaydetAsync(Guid oturumId)
+    {
+        try
+        {
+            await using var kapsam = kapsamlar.CreateAsyncScope();
+            await kapsam.ServiceProvider.GetRequiredService<IstatistikHesaplayici>().KaydetAsync(oturumId, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            gunluk.LogError(ex, "Ders {Oturum} istatistikleri hesaplanamadı.", oturumId);
+        }
     }
 
     public async Task<bool> SilAsync(Guid oturumId)

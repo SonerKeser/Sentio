@@ -15,7 +15,8 @@ public sealed record RaporSinif(
 
 public sealed record RaporKatilimci(
     Guid Id, string Ad, KatilimciKaynagi Kaynak, double SureSn, int OkumaSayisi, float YuzOrani,
-    float[] Dagilim, float[] BaskinOranlari, Duygu? Baskin, float Dikkat, float Valans, float Katilim, int UyariSayisi);
+    float[] Dagilim, float[] BaskinOranlari, Duygu? Baskin, float Dikkat, float Valans, float Katilim, int UyariSayisi,
+    int AnlamadimSayisi, int SoruSayisi);
 
 public sealed record RaporDilim(long ZamanMs, int Aktif, float[] Dagilim, float Dikkat, float Valans, float OlumsuzOran);
 
@@ -32,7 +33,8 @@ public sealed record Rapor(
     IReadOnlyList<RaporKatilimci> Katilimcilar,
     RaporZaman Zaman,
     IReadOnlyList<RaporAn> OnemliAnlar,
-    IReadOnlyList<UyariBildirimi> Uyarilar);
+    IReadOnlyList<UyariBildirimi> Uyarilar,
+    RaporEtkilesim Etkilesim);
 
 /// <summary>Bir oturumun tüm ölçümlerinden öğrenci, sınıf ve zaman ekseninde özet çıkarır.</summary>
 public sealed class RaporOlusturucu(SezgiVeritabani db)
@@ -59,16 +61,21 @@ public sealed class RaporOlusturucu(SezgiVeritabani db)
             .Where(u => u.OturumId == oturumId)
             .OrderBy(u => u.Id)
             .ToListAsync(iptal);
+        var bolumler = await db.Bolumler.AsNoTracking().Where(b => b.OturumId == oturumId).ToListAsync(iptal);
+        var yoklamalar = await db.Yoklamalar.AsNoTracking().Include(y => y.Yanitlar).Where(y => y.OturumId == oturumId).ToListAsync(iptal);
+        var sinyaller = await db.Sinyaller.AsNoTracking().Where(s => s.OturumId == oturumId).ToListAsync(iptal);
 
         var anonim = oturum.Ayarlar.Anonim;
         var adlar = oturum.Katilimcilar.ToDictionary(k => k.Id, k => anonim ? $"Katılımcı {k.SiraNo}" : k.Ad);
-        var rapor = Hesapla(oturum, okumalar, uyarilar, adlar, aralikSn);
+        var rapor = Hesapla(oturum, okumalar, uyarilar, adlar, aralikSn, bolumler, yoklamalar, sinyaller);
         return (rapor, okumalar, adlar);
     }
 
     public static Rapor Hesapla(Oturum oturum, IReadOnlyList<Okuma> okumalar, IReadOnlyList<Uyari> uyarilar,
-        IReadOnlyDictionary<Guid, string> adlar, int? aralikSn)
+        IReadOnlyDictionary<Guid, string> adlar, int? aralikSn,
+        IReadOnlyList<Bolum>? bolumler = null, IReadOnlyList<Yoklama>? yoklamalar = null, IReadOnlyList<Sinyal>? sinyaller = null)
     {
+        var sinyalSayilari = (sinyaller ?? []).GroupBy(s => (s.KatilimciId, s.Tur)).ToDictionary(g => g.Key, g => g.Count());
         var baslangicMs = okumalar.Count > 0
             ? okumalar[0].ZamanMs
             : new DateTimeOffset(DateTime.SpecifyKind(oturum.OlusturmaZamani, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
@@ -177,7 +184,9 @@ public sealed class RaporOlusturucu(SezgiVeritabani db)
                 yuzlu > 0 ? Yuvarla(dikkat / yuzlu) : 0f,
                 yuzlu > 0 ? Yuvarla(valans / yuzlu) : 0f,
                 Yuvarla(katilim / liste.Count),
-                uyariSayilari.GetValueOrDefault(k.Id)));
+                uyariSayilari.GetValueOrDefault(k.Id),
+                sinyalSayilari.GetValueOrDefault((k.Id, SinyalTuru.Anlamadim)),
+                sinyalSayilari.GetValueOrDefault((k.Id, SinyalTuru.Soru))));
             satirlar.Add(new RaporSatir(k.Id, ad, hucreler));
 
             if (yuzlu > 0)
@@ -228,8 +237,11 @@ public sealed class RaporOlusturucu(SezgiVeritabani db)
             .Select(u => OlcumIsleyici.Bildirim(u, u.KatilimciId is { } id ? adlar.GetValueOrDefault(id) : null))
             .ToList();
 
+        var sonMs = Math.Max(bitisMs, oturum.BitisZamani is { } b ? RaporEtkilesimi.Ms(b) : bitisMs);
+        var etkilesim = RaporEtkilesimi.Hesapla(okumalar, adlar, bolumler ?? [], yoklamalar ?? [], sinyaller ?? [], sonMs);
+
         return new Rapor(raporOturum, sinif, katilimcilar, new RaporZaman(aralik, dilimler, satirlar),
-            OnemliAnlar(dilimler), uyariBildirimleri);
+            OnemliAnlar(dilimler), uyariBildirimleri, etkilesim);
     }
 
     /// <summary>Olumsuz ifadenin yoğunlaştığı, dikkatin düştüğü ve sınıfın en neşeli olduğu dilimleri seçer.</summary>

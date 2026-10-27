@@ -1,21 +1,36 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { HubConnectionState, type HubConnection } from '@microsoft/signalr';
-import { Eye, EyeOff, LogOut, Pause, Play, ShieldCheck, Wifi, WifiOff } from 'lucide-react';
+import { Eye, EyeOff, LogOut, Pause, Play, ShieldCheck, Vote, Wifi, WifiOff } from 'lucide-react';
 import { baskin, DUYGU, yuzde } from '../../alan/duygular';
 import { useKameraAnalizi, type AnlikIfade } from '../../analiz/kamera';
 import { hubBaglantisi } from '../../api/istemci';
-import type { DurtmeBildirimi, KatilimYaniti, OgrenciAyarlari, OkumaGirdisi } from '../../api/turler';
+import type { DurtmeBildirimi, KatilimYaniti, MolaBildirimi, OgrenciAyarlari, OgrenciDurumu, OkumaGirdisi, SinyalTuru, YoklamaBildirimi } from '../../api/turler';
 import { Maskot } from '../../bilesenler/Maskot';
 import { Logo } from '../../bilesenler/marka';
-import { Donen, Dugme, Halka, sinif, TayfCubugu, useKalici } from '../../bilesenler/ui';
+import { Donen, Dugme, Halka, sinif, TayfCubugu, useBildirim, useKalici } from '../../bilesenler/ui';
 import { masaustu } from '../../ortam';
 import { durtmeIcerigi, type DurtmeIcerigi } from './durtmeler';
+import { AyrilPenceresi, MolaEkrani, SinyalCubugu, YoklamaKarti } from './Etkilesim';
+import { OzetToplayici, type DersOzeti } from './ozet';
+
+/** "Anlamadım" ve "Yavaşlar mısınız" sunucuda olduğu gibi burada da 90 saniye sonra düşer. */
+const SINYAL_OMRU_MS = 90_000;
 
 type BaglantiDurumu = 'baglaniyor' | 'bagli' | 'yeniden' | 'kopuk';
 
-export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: (neden: 'ayrildi' | 'bitti') => void }) {
+export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: (neden: 'ayrildi' | 'bitti', ozet?: DersOzeti) => void }) {
   const [ayarlar, setAyarlar] = useState<OgrenciAyarlari>(katilim.ayarlar);
+  const [yoklama, setYoklama] = useState<YoklamaBildirimi | null>(null);
+  const [yoklamaGizli, setYoklamaGizli] = useState(false);
+  const [molaBitis, setMolaBitis] = useState<number | null>(null);
+  const [acikSinyaller, setAcikSinyaller] = useState<Set<SinyalTuru>>(new Set());
+  const [ayrilAcik, setAyrilAcik] = useState(false);
+  const ozetRef = useRef(new OzetToplayici());
+  const sinyalZamanlari = useRef(new Map<SinyalTuru, ReturnType<typeof setTimeout>>());
+  const bildir = useBildirim();
+  const bildirRef = useRef(bildir);
+  bildirRef.current = bildir;
   const [duraklatildi, setDuraklatildi] = useState(false);
   const [baglanti, setBaglanti] = useState<BaglantiDurumu>('baglaniyor');
   const [durtme, setDurtme] = useState<DurtmeIcerigi | null>(null);
@@ -28,7 +43,28 @@ export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: 
     const hub = hubBaglantisi('/hub/ogrenci', () => katilim.jeton);
     hubRef.current = hub;
     hub.on('Ayarlar', (a: OgrenciAyarlari) => setAyarlar(a));
-    hub.on('OturumBitti', () => bittiRef.current('bitti'));
+    hub.on('Durum', (d: OgrenciDurumu) => {
+      setAyarlar(d.ayarlar);
+      setYoklama(d.yoklama);
+      setMolaBitis(d.mola?.bitisMs ?? null);
+      setAcikSinyaller(new Set(d.acikSinyaller));
+    });
+    hub.on('Yoklama', (y: YoklamaBildirimi) => {
+      setYoklama(y);
+      setYoklamaGizli(false);
+      masaustu()?.durtme({ baslik: 'Öğretmeninden kısa bir soru', metin: y.soru });
+    });
+    hub.on('YoklamaKapandi', (id: string) => setYoklama((y) => (y?.id === id ? null : y)));
+    hub.on('Mola', (m: MolaBildirimi | null) => setMolaBitis(m?.bitisMs ?? null));
+    hub.on('SinyalKapandi', (tur: SinyalTuru) => {
+      setAcikSinyaller((s) => {
+        const yeni = new Set(s);
+        yeni.delete(tur);
+        return yeni;
+      });
+      if (tur === 'soru') bildirRef.current('Öğretmenin söz isteğini gördü.', 'basari');
+    });
+    hub.on('OturumBitti', () => bittiRef.current('bitti', ozetRef.current.sonuc(false)));
     hub.on('Durtme', (d: DurtmeBildirimi) => {
       const icerik = durtmeIcerigi(d);
       setDurtme(icerik);
@@ -58,19 +94,60 @@ export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: 
 
   const okuma = useCallback((o: OkumaGirdisi) => {
     const hub = hubRef.current;
-    if (hub?.state === HubConnectionState.Connected) hub.send('Okuma', o).catch(() => {});
+    if (hub?.state !== HubConnectionState.Connected) return;
+    hub.send('Okuma', o).catch(() => {});
+    ozetRef.current.ekle(o);
   }, []);
 
-  const { videoRef, durum, hata, anlik } = useKameraAnalizi({ etkin: !duraklatildi, orneklemeMs: ayarlar.orneklemeMs, okuma });
+  const molada = molaBitis !== null;
+  const { videoRef, durum, hata, anlik } = useKameraAnalizi({ etkin: !duraklatildi && !molada, orneklemeMs: ayarlar.orneklemeMs, okuma });
+
+  const sinyalDegis = (tur: SinyalTuru, acik: boolean) =>
+    setAcikSinyaller((s) => {
+      const yeni = new Set(s);
+      if (acik) yeni.add(tur);
+      else yeni.delete(tur);
+      return yeni;
+    });
+
+  const sinyalGonder = async (tur: SinyalTuru, metin?: string) => {
+    const hub = hubRef.current;
+    if (hub?.state !== HubConnectionState.Connected) return;
+    const tamam = await hub.invoke<boolean>('Sinyal', tur, metin ?? null).catch(() => false);
+    if (!tamam) {
+      bildir('Birkaç saniye sonra yeniden dene.', 'bilgi');
+      return;
+    }
+    ozetRef.current.sinyalGonderildi();
+    sinyalDegis(tur, true);
+    clearTimeout(sinyalZamanlari.current.get(tur));
+    if (tur !== 'soru') sinyalZamanlari.current.set(tur, setTimeout(() => sinyalDegis(tur, false), SINYAL_OMRU_MS));
+  };
+
+  const sinyalGeriAl = async (tur: SinyalTuru) => {
+    sinyalDegis(tur, false);
+    clearTimeout(sinyalZamanlari.current.get(tur));
+    await hubRef.current?.invoke('SinyalGeriAl', tur).catch(() => {});
+  };
+
+  const yoklamaYanitla = async (secim: number) => {
+    if (!yoklama) return;
+    const tamam = await hubRef.current?.invoke<boolean>('YoklamaYanitla', yoklama.id, secim).catch(() => false);
+    if (tamam) {
+      ozetRef.current.yoklamaYanitlandi(yoklama.id);
+      setYoklama({ ...yoklama, secim });
+      setTimeout(() => setYoklamaGizli(true), 900);
+    }
+  };
 
   const duraklat = async (d: boolean) => {
     setDuraklatildi(d);
     if (hubRef.current?.state === HubConnectionState.Connected) await hubRef.current.invoke('Duraklat', d).catch(() => {});
   };
 
-  const ayril = async () => {
-    if (hubRef.current?.state === HubConnectionState.Connected) await hubRef.current.invoke('Ayril').catch(() => {});
-    bitti('ayrildi');
+  const ayril = async (verileriSil: boolean) => {
+    if (hubRef.current?.state === HubConnectionState.Connected) await hubRef.current.invoke('Ayril', verileriSil).catch(() => {});
+    bitti('ayrildi', ozetRef.current.sonuc(verileriSil));
   };
 
   const duygu = anlik?.yuz ? baskin(anlik.d) : 'notr';
@@ -123,6 +200,12 @@ export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: 
                   : 'Derse odaklanabilirsin. Bu pencereyi kapatma; arka planda çalışmaya devam eder.'}
           </p>
 
+          {!duraklatildi && (
+            <div className="mt-6 w-full">
+              <SinyalCubugu acik={acikSinyaller} gonder={sinyalGonder} geriAl={sinyalGeriAl} devreDisi={baglanti !== 'bagli'} />
+            </div>
+          )}
+
           {kendiniGor && anlik?.yuz && !duraklatildi && (
             <div className="mt-6 flex w-full max-w-sm items-center gap-4">
               <Halka deger={anlik.dikkat} boyut={52}>
@@ -166,7 +249,12 @@ export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: 
           <Dugme tur={duraklatildi ? 'birincil' : 'ikincil'} boyut="buyuk" simge={duraklatildi ? <Play size={18} /> : <Pause size={18} />} onClick={() => duraklat(!duraklatildi)}>
             {duraklatildi ? 'Analizi sürdür' : 'Duraklat'}
           </Dugme>
-          <Dugme tur="hayalet" simge={<LogOut size={16} />} onClick={ayril}>
+          {yoklama && yoklamaGizli && (
+            <Dugme tur="ikincil" simge={<Vote size={17} />} onClick={() => setYoklamaGizli(false)}>
+              {yoklama.secim === null ? 'Açık yoklamayı yanıtla' : 'Yoklama yanıtını gör'}
+            </Dugme>
+          )}
+          <Dugme tur="hayalet" simge={<LogOut size={16} />} onClick={() => setAyrilAcik(true)}>
             Dersten ayrıl
           </Dugme>
           {masaustu() && (
@@ -177,7 +265,10 @@ export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: 
         </aside>
       </section>
 
-      <AnimatePresence>{durtme && <DurtmeKarti icerik={durtme} kapat={() => setDurtme(null)} />}</AnimatePresence>
+      <AnimatePresence>{durtme && !molada && <DurtmeKarti icerik={durtme} kapat={() => setDurtme(null)} />}</AnimatePresence>
+      <AnimatePresence>{yoklama && !yoklamaGizli && !molada && <YoklamaKarti yoklama={yoklama} yanitla={yoklamaYanitla} kapat={() => setYoklamaGizli(true)} />}</AnimatePresence>
+      <AnimatePresence>{molaBitis !== null && <MolaEkrani bitisMs={molaBitis} />}</AnimatePresence>
+      <AyrilPenceresi acik={ayrilAcik} kapat={() => setAyrilAcik(false)} ayril={ayril} />
     </main>
   );
 }

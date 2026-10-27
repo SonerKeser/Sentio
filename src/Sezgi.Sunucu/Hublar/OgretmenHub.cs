@@ -13,6 +13,7 @@ public sealed class OgretmenHub(
     CanliOturumDeposu depo,
     OlcumIsleyici isleyici,
     OturumYoneticisi yonetici,
+    EtkilesimYoneticisi etkilesim,
     IDbContextFactory<SezgiVeritabani> fabrika) : Hub
 {
     private const string IzlenenlerAnahtari = "izlenen";
@@ -28,7 +29,7 @@ public sealed class OgretmenHub(
             Interlocked.Increment(ref oturum.Izleyici);
             await Groups.AddToGroupAsync(Context.ConnectionId, Grup(oturumId));
         }
-        var anlik = CanliYayinci.Olustur(oturum, isleyici.SimdiMs);
+        var anlik = CanliYayinci.Olustur(oturum, isleyici.SimdiMs, etkilesim);
         return new IzlemeBaslangici(yonetici.Detay(oturum), anlik, oturum.SonUyarilar());
     }
 
@@ -56,6 +57,29 @@ public sealed class OgretmenHub(
         }
         await isleyici.OgretmenMesajiAsync(oturum, katilimci, metin);
     }
+
+    // Etkileşim: yoklama, söz istekleri, bölümler ve mola
+
+    public async Task<YoklamaDurumu> YoklamaBaslat(Guid oturumId, YoklamaIstegi istek)
+    {
+        var oturum = YetkiliOturum(oturumId);
+        if (oturum.MoladaMi) throw new HubException("Molada yoklama başlatılamaz.");
+        return await etkilesim.YoklamaBaslatAsync(oturum, istek.Tur, istek.Soru, istek.Secenekler)
+               ?? throw new HubException("Yoklama sorusu ya da seçenekleri geçersiz.");
+    }
+
+    public Task YoklamaKapat(Guid oturumId) => etkilesim.YoklamaKapatAsync(YetkiliOturum(oturumId));
+
+    public Task SinyalYanitla(Guid oturumId, long sinyalId) => etkilesim.SinyalYanitlaAsync(YetkiliOturum(oturumId), sinyalId);
+
+    public Task SinyalleriTemizle(Guid oturumId, SinyalTuru tur) => etkilesim.SinyalleriTemizleAsync(YetkiliOturum(oturumId), tur);
+
+    public async Task<BolumDurumu> BolumBaslat(Guid oturumId, string ad) =>
+        await etkilesim.BolumBaslatAsync(YetkiliOturum(oturumId), ad) ?? throw new HubException("Bölüm adı girin.");
+
+    public Task<BolumDurumu> MolaBaslat(Guid oturumId, int dakika) => etkilesim.MolaBaslatAsync(YetkiliOturum(oturumId), dakika);
+
+    public Task MolaBitir(Guid oturumId) => etkilesim.MolaBitirAsync(YetkiliOturum(oturumId));
 
     /// <summary>Öğretmen tarayıcısında yapılan galeri (ekran paylaşımı) analizinin ölçümleri.</summary>
     public async Task GaleriOkumalari(Guid oturumId, GaleriOkumasi[] okumalar)
