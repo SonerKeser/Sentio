@@ -1,6 +1,6 @@
 # Eski sistemin analizi: EmotionDedect
 
-Sezgi, daha önce akademik bir proje için geliştirilmeye çalışılan **EmotionDedect** adlı sistemin yeniden ele alınmış halidir. Bu belge eski sistemin ne yapmaya çalıştığını, nasıl çalıştığını, nerede tıkandığını ve Sezgi'de her sorunun nasıl çözüldüğünü özetler.
+Sentio, daha önce akademik bir proje için geliştirilmeye çalışılan **EmotionDedect** adlı sistemin yeniden ele alınmış halidir. Bu belge eski sistemin ne yapmaya çalıştığını, nasıl çalıştığını, nerede tıkandığını ve Sentio'da her sorunun nasıl çözüldüğünü özetler.
 
 ## Amaç
 
@@ -58,9 +58,9 @@ Sezgi, daha önce akademik bir proje için geliştirilmeye çalışılan **Emoti
 - Tekrar algılama, Excel hücrelerinin üzerinde satır satır gezinerek yapılıyor; gürültüye karşı yumuşatma yok, tek bir yanlış kare sayacı sıfırlıyor.
 - GIF'ler üçüncü taraf çıkartmalar (lisans durumu belirsiz).
 
-## Sezgi'deki karşılıkları
+## Sentio'daki karşılıkları
 
-| Eski sistem | Sezgi |
+| Eski sistem | Sentio |
 | --- | --- |
 | Öğretmenin ekran görüntüsü + yüz tanıma | **Öğrenci cihazında analiz**: öğrenci kodla katılır, kimlik oturumdan gelir; yüz tanımaya gerek kalmaz. Ekran yöntemi isteğe bağlı **galeri analizi** olarak korunur, ama sunucuya görüntü gitmez ve yüz tanımlayıcıları yalnızca tarayıcı belleğinde tutulur. |
 | Python + TensorFlow + dlib kurulumu | Tarayıcıda/Electron'da WebGL ile çalışan Human (TensorFlow.js) modelleri; modeller sunucuyla birlikte gelir, kurulum ve internet gerekmez. |

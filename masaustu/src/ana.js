@@ -1,5 +1,5 @@
-// Sezgi masaüstü istemcisi: ana süreç.
-// Arayüzün kendisi Sezgi sunucusundan yüklenir; bu süreç pencereyi, sistem tepsisini, izinleri,
+// Sentio masaüstü istemcisi: ana süreç.
+// Arayüzün kendisi Sentio sunucusundan yüklenir; bu süreç pencereyi, sistem tepsisini, izinleri,
 // destek bildirimlerini, ekran seçiciyi ve yerel ağdaki sunucuların bulunmasını yönetir.
 const { app, BrowserWindow, Tray, Menu, ipcMain, session, desktopCapturer, shell, nativeImage, Notification, net, systemPreferences } = require('electron');
 const path = require('node:path');
@@ -9,13 +9,20 @@ const dgram = require('node:dgram');
 const DUYURU_PORTU = 5758;
 const MAC = process.platform === 'darwin';
 const ayarDosyasi = () => path.join(app.getPath('userData'), 'ayarlar.json');
+// Sentio 1.2 sürümüne kadar "Sezgi" adını taşıyordu: eski kurulumun ayarları ve o sürümlerin sunucuları tanınır.
+const ESKI_AD = 'Sezgi';
+const eskiAyarDosyasi = () => path.join(app.getPath('appData'), ESKI_AD, 'ayarlar.json');
+const sentioSunucusuMu = (ad) => ad === 'Sentio' || ad === ESKI_AD;
 
 function ayarlariOku() {
-  try {
-    return JSON.parse(fs.readFileSync(ayarDosyasi(), 'utf8'));
-  } catch {
-    return { sunucu: null, rol: 'ogrenci', sonSunucular: [] };
+  for (const dosya of [ayarDosyasi(), eskiAyarDosyasi()]) {
+    try {
+      return JSON.parse(fs.readFileSync(dosya, 'utf8'));
+    } catch {
+      /* sıradaki dosya */
+    }
   }
+  return { sunucu: null, rol: 'ogrenci', sonSunucular: [] };
 }
 
 function ayarlariYaz(ayarlar) {
@@ -40,7 +47,7 @@ function adresNormallestir(girdi) {
 let ayarlar = ayarlariOku();
 
 // Tarayıcılar kamerayı yalnızca güvenli bağlamda açar. Okul ağlarında sunucu çoğu zaman düz http ile
-// çalıştığından, yalnızca kullanıcının seçtiği Sezgi sunucusu güvenli kabul edilir. Bu anahtar başlangıçta
+// çalıştığından, yalnızca kullanıcının seçtiği Sentio sunucusu güvenli kabul edilir. Bu anahtar başlangıçta
 // verilmek zorunda olduğundan sunucu değişince uygulama yeniden başlatılır.
 if (ayarlar.sunucu && ayarlar.sunucu.startsWith('http://')) {
   app.commandLine.appendSwitch('unsafely-treat-insecure-origin-as-secure', ayarlar.sunucu);
@@ -88,7 +95,7 @@ function pencereOlustur() {
     minWidth: 900,
     minHeight: 620,
     backgroundColor: '#1A1535',
-    title: 'Sezgi',
+    title: 'Sentio',
     icon: simgeYolu('simge.png'),
     autoHideMenuBar: true,
     show: false,
@@ -128,7 +135,7 @@ function pencereOlustur() {
     if (!tepsiBilgisiGosterildi && Notification.isSupported()) {
       tepsiBilgisiGosterildi = true;
       const yer = MAC ? 'menü çubuğundaki' : 'sistem tepsisindeki';
-      new Notification({ title: 'Sezgi çalışmaya devam ediyor', body: `Ders sürerken arka planda kalır. Kapatmak için ${yer} simgeyi kullanın.`, icon: simgeYolu('simge.png') }).show();
+      new Notification({ title: 'Sentio çalışmaya devam ediyor', body: `Ders sürerken arka planda kalır. Kapatmak için ${yer} simgeyi kullanın.`, icon: simgeYolu('simge.png') }).show();
     }
   });
 
@@ -140,15 +147,15 @@ function pencereOlustur() {
 function macMenusu() {
   return Menu.buildFromTemplate([
     {
-      label: 'Sezgi',
+      label: 'Sentio',
       submenu: [
-        { role: 'about', label: 'Sezgi hakkında' },
+        { role: 'about', label: 'Sentio hakkında' },
         { type: 'separator' },
-        { role: 'hide', label: 'Sezgi’yi gizle' },
+        { role: 'hide', label: 'Sentio’yu gizle' },
         { role: 'hideOthers', label: 'Diğerlerini gizle' },
         { role: 'unhide', label: 'Tümünü göster' },
         { type: 'separator' },
-        { role: 'quit', label: 'Sezgi’den çık' },
+        { role: 'quit', label: 'Sentio’dan çık' },
       ],
     },
     {
@@ -176,10 +183,10 @@ function macMenusu() {
 function tepsiOlustur() {
   // macOS menü çubuğu tek renkli şablon simge ister; @2x sürümü kendiliğinden seçilir.
   tepsi = new Tray(nativeImage.createFromPath(simgeYolu(MAC ? 'tepsiTemplate.png' : 'tepsi.png')));
-  tepsi.setToolTip('Sezgi');
+  tepsi.setToolTip('Sentio');
   const menu = () =>
     Menu.buildFromTemplate([
-      { label: 'Sezgi’yi göster', click: goster },
+      { label: 'Sentio’yu göster', click: goster },
       { label: 'Sunucuyu değiştir', click: () => (goster(), baglantiSayfasiniAc()) },
       { type: 'separator' },
       { label: 'Çıkış', click: () => ((cikiliyor = true), app.quit()) },
@@ -248,7 +255,7 @@ function ipcKaydet() {
       const yanit = await net.fetch(`${koken}/saglik`, { signal: denetleyici.signal });
       clearTimeout(zaman);
       const govde = await yanit.json();
-      if (govde?.ad !== 'Sezgi') return { tamam: false, hata: 'Bu adreste bir Sezgi sunucusu yok.' };
+      if (!sentioSunucusuMu(govde?.ad)) return { tamam: false, hata: 'Bu adreste bir Sentio sunucusu yok.' };
       return { tamam: true, koken, surum: govde.surum };
     } catch {
       return { tamam: false, hata: 'Sunucuya ulaşılamadı. Adresi ve aynı ağda olduğunuzu kontrol edin.' };
@@ -284,7 +291,7 @@ function ipcKaydet() {
     return {
       izinGerekli,
       kaynaklar: kaynaklar
-        .filter((k) => !k.name.startsWith('Sezgi'))
+        .filter((k) => !k.name.startsWith('Sentio'))
         .map((k) => ({ id: k.id, ad: k.name, ekran: k.id.startsWith('screen:'), resim: k.thumbnail.toDataURL(), simge: k.appIcon?.toDataURL() ?? null })),
     };
   });
@@ -321,7 +328,7 @@ function ipcKaydet() {
   });
 
   ipcMain.on('masaustu:durum', (olay, { metin }) => {
-    if (olay.sender === pencere?.webContents) tepsi?.setToolTip(`Sezgi · ${String(metin).slice(0, 100)}`);
+    if (olay.sender === pencere?.webContents) tepsi?.setToolTip(`Sentio · ${String(metin).slice(0, 100)}`);
   });
 
   ipcMain.on('masaustu:sunucu-degistir', (olay) => {
@@ -335,14 +342,14 @@ function sunuculariDinle() {
   soket.on('message', (ileti) => {
     try {
       const d = JSON.parse(ileti.toString('utf8'));
-      if (d?.ad !== 'Sezgi' || !Array.isArray(d.adresler)) return;
+      if (!sentioSunucusuMu(d?.ad) || !Array.isArray(d.adresler)) return;
       // Bir sunucu birden çok ağ bağdaştırıcısından duyurulabilir; makine başına tek kayıt tutulur.
       const kokenler = d.adresler.slice(0, 6).map(adresNormallestir).filter(Boolean);
       if (kokenler.length === 0) return;
       const makine = String(d.makine || '').slice(0, 60);
       bulunanSunucular.set(makine || kokenler[0], { koken: kokenler[0], digerleri: kokenler.slice(1), makine, surum: String(d.surum || ''), zaman: Date.now() });
     } catch {
-      /* Sezgi duyurusu değil */
+      /* Sentio duyurusu değil */
     }
   });
   soket.on('error', () => soket.close());
@@ -360,7 +367,7 @@ async function guncellemeleriDenetle() {
   try {
     const { autoUpdater } = require('electron-updater');
     autoUpdater.autoDownload = true;
-    await autoUpdater.checkForUpdatesAndNotify({ title: 'Sezgi güncellendi', body: 'Yeni sürüm uygulama kapanınca kurulacak.' });
+    await autoUpdater.checkForUpdatesAndNotify({ title: 'Sentio güncellendi', body: 'Yeni sürüm uygulama kapanınca kurulacak.' });
   } catch {
     /* çevrimdışı okul ağı: güncelleme denetimi atlanır */
   }
@@ -373,6 +380,7 @@ app.on('before-quit', () => (cikiliyor = true));
 app.on('window-all-closed', () => app.quit());
 
 app.whenReady().then(() => {
+  // Uygulama kimliği eski addan kalır: değişseydi kurulu Sezgi 1.x uygulamaları yerinde güncellenemezdi.
   app.setAppUserModelId('com.sonerkeser.sezgi');
   Menu.setApplicationMenu(MAC ? macMenusu() : null);
   izinleriAyarla();

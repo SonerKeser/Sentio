@@ -11,7 +11,7 @@ import { DersEkrani } from './DersEkrani';
 import { DersOzetiKarti } from './DersOzetiKarti';
 import type { DersOzeti } from './ozet';
 
-const ANAHTAR = 'sezgi.katilim';
+const ANAHTAR = 'sentio.katilim';
 
 interface Basvuru {
   kod: string;
@@ -113,7 +113,7 @@ function Sahne({ children }: { children: React.ReactNode }) {
 function KatilimFormu({ tamam }: { tamam: (b: Basvuru) => void }) {
   const { kod: adresKodu } = useParams();
   const [kod, setKod] = useState((adresKodu ?? '').toUpperCase().slice(0, 6));
-  const [ad, setAd] = useState(() => localStorage.getItem('sezgi.ad') ?? '');
+  const [ad, setAd] = useState(() => localStorage.getItem('sentio.ad') ?? '');
   const [onizleme, setOnizleme] = useState<KatilimOnizleme | null>(null);
   const [kodHatasi, setKodHatasi] = useState<string | null>(null);
   const temizKod = kod.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
@@ -134,7 +134,7 @@ function KatilimFormu({ tamam }: { tamam: (b: Basvuru) => void }) {
     e.preventDefault();
     if (!onizleme) return;
     try {
-      localStorage.setItem('sezgi.ad', ad.trim());
+      localStorage.setItem('sentio.ad', ad.trim());
     } catch {
       /* özel pencere */
     }
@@ -188,7 +188,7 @@ function KatilimFormu({ tamam }: { tamam: (b: Basvuru) => void }) {
 
       <div className="hidden justify-center md:flex">
         <div className="animate-suzul">
-          <Maskot duygu={onizleme ? 'mutlu' : 'notr'} boyut={300} etiket="Sezgi maskotu" />
+          <Maskot duygu={onizleme ? 'mutlu' : 'notr'} boyut={300} etiket="Sentio maskotu" />
         </div>
       </div>
     </div>

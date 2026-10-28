@@ -34,7 +34,7 @@ export async function bildirimIzniIste(): Promise<boolean> {
 
 /**
  * Öğretmen başka bir pencereye (ör. video konferans) geçtiğinde yeni uyarıları ve söz isteklerini
- * sistem bildirimi ve kısa bir sesle duyurur. Sezgi penceresi öndeyken sessiz kalır.
+ * sistem bildirimi ve kısa bir sesle duyurur. Sentio penceresi öndeyken sessiz kalır.
  */
 export function useOgretmenBildirimleri(acik: boolean, uyarilar: UyariBildirimi[], sorular: SinyalBildirimi[]) {
   const gorulen = useRef<Set<string> | null>(null);
@@ -56,7 +56,7 @@ export function useOgretmenBildirimleri(acik: boolean, uyarilar: UyariBildirimi[
       new Notification(`${s.ad} söz istiyor`, { body: s.metin ?? 'Sorusu var.', tag: `soru-${s.id}`, silent: true });
     }
     for (const u of yeniUyarilar.slice(0, 3)) {
-      new Notification('Sezgi', { body: u.mesaj, tag: `uyari-${u.id}`, silent: true });
+      new Notification('Sentio', { body: u.mesaj, tag: `uyari-${u.id}`, silent: true });
     }
   }, [acik, uyarilar, sorular]);
 }

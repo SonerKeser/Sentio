@@ -47,7 +47,7 @@ export default function PanelKabugu() {
     <Baglam.Provider value={{ ogretmen: durum.ogretmen, surum: durum.surum }}>
       <div className="flex min-h-dvh flex-col lg:flex-row">
         <nav className="yazdirma-gizle flex shrink-0 items-center gap-1 border-b border-cizgi/60 bg-gece px-4 py-2.5 lg:sticky lg:top-0 lg:h-dvh lg:w-[76px] lg:flex-col lg:border-b-0 lg:border-r lg:px-0 lg:py-5">
-          <NavLink to="/" className="mr-3 lg:mb-6 lg:mr-0" aria-label="Sezgi ana sayfa">
+          <NavLink to="/" className="mr-3 lg:mb-6 lg:mr-0" aria-label="Sentio ana sayfa">
             <LogoIsareti boyut={34} />
           </NavLink>
           <RayBag to="/panel" end simge={<LayoutGrid size={21} />} etiket="Dersler" />
@@ -142,7 +142,7 @@ function GirisEkrani({ kurulum, tamam }: { kurulum: boolean; tamam: () => void }
         </div>
         <form onSubmit={gonder} className="flex w-full max-w-sm flex-col gap-5">
           <div>
-            <h1 className="text-4xl font-bold">{kurulum ? 'Sezgi’yi kuralım' : 'Öğretmen girişi'}</h1>
+            <h1 className="text-4xl font-bold">{kurulum ? 'Sentio’yu kuralım' : 'Öğretmen girişi'}</h1>
             <p className="mt-2 text-soluk">
               {kurulum ? 'Bu sunucunun ilk hesabını oluşturun. Bu hesap diğer öğretmenleri ekleyebilen yönetici olur.' : 'Ders başlatmak ve raporlarınızı görmek için giriş yapın.'}
             </p>

@@ -8,7 +8,7 @@ import tarfile
 
 klasor, cikti = sys.argv[1], sys.argv[2]
 kok_ad = os.path.basename(os.path.normpath(klasor))
-CALISTIRILABILIR = {"Sezgi.Sunucu", "createdump"}
+CALISTIRILABILIR = {"Sentio.Sunucu", "createdump"}
 
 
 def ayarla(bilgi: tarfile.TarInfo) -> tarfile.TarInfo:

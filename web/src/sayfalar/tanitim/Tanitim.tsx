@@ -21,7 +21,7 @@ export function Tanitim() {
       <section id="indir" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-24 sm:px-8">
         <h2 className="text-5xl font-bold sm:text-6xl">İndir ve kur</h2>
         <p className="mt-4 max-w-2xl text-lg text-soluk">
-          Sezgi üç parçadan oluşur: bir sunucu, öğrenci ve öğretmen bilgisayarları için bir masaüstü uygulaması ve kurulum gerektirmeyen web istemcisi. Bir ders için sunucu ve bir tarayıcı yeterlidir.
+          Sentio üç parçadan oluşur: bir sunucu, öğrenci ve öğretmen bilgisayarları için bir masaüstü uygulaması ve kurulum gerektirmeyen web istemcisi. Bir ders için sunucu ve bir tarayıcı yeterlidir.
         </p>
         <div className="mt-10">
           <Indirmeler />
@@ -88,7 +88,7 @@ function Kahraman() {
           Ekranın öbür ucundaki sınıfı hissedin.
         </motion.h1>
         <motion.p {...giris(0.12)} className="mt-7 max-w-xl text-xl leading-relaxed text-soluk">
-          Sezgi, çevrim içi derste öğrencilerin yüz ifadesini ve dikkatini kendi cihazlarında çözümler; size yalnızca sınıfın nabzını gönderir. Görüntü hiçbir zaman cihazdan çıkmaz.
+          Sentio, çevrim içi derste öğrencilerin yüz ifadesini ve dikkatini kendi cihazlarında çözümler; size yalnızca sınıfın nabzını gönderir. Görüntü hiçbir zaman cihazdan çıkmaz.
         </motion.p>
         <motion.div {...giris(0.22)} className="mt-9 flex flex-wrap gap-3">
           <a href="#indir" className="inline-flex h-13 items-center gap-2 rounded-pill bg-gunes px-6 text-base font-semibold text-gece shadow-[0_10px_30px_-12px_rgb(255_201_74/0.9)] hover:bg-gunes-koyu">
@@ -129,7 +129,7 @@ function Gizlilik() {
   const adimlar = [
     { simge: <Camera size={22} />, baslik: 'Kamera', metin: 'Saniyede birkaç kare, yalnızca tarayıcının belleğinde.' },
     { simge: <Cpu size={22} />, baslik: 'Cihazdaki model', metin: 'Yüz bulma, 468 noktalı yüz ağı, ifade sınıflandırma; ekran kartında.' },
-    { simge: <Server size={22} />, baslik: 'Sezgi sunucusu', metin: 'Sayıları yumuşatır, kuralları işletir, saklar.' },
+    { simge: <Server size={22} />, baslik: 'Sentio sunucusu', metin: 'Sayıları yumuşatır, kuralları işletir, saklar.' },
     { simge: <LayoutDashboard size={22} />, baslik: 'Öğretmen paneli', metin: 'Canlı sınıf nabzı, uyarılar, rapor.' },
   ];
   return (
@@ -190,7 +190,7 @@ function Gizlilik() {
 
 function Akis() {
   const adimlar: { baslik: string; metin: string; duygu: Duygu }[] = [
-    { baslik: 'Dersi başlatın', metin: 'Panelde bir ders açın. Sezgi altı karakterlik bir kod ve karekod üretir; kalıcılık eşiği, izlenen ifadeler ve anonim mod derse özeldir.', duygu: 'notr' },
+    { baslik: 'Dersi başlatın', metin: 'Panelde bir ders açın. Sentio altı karakterlik bir kod ve karekod üretir; kalıcılık eşiği, izlenen ifadeler ve anonim mod derse özeldir.', duygu: 'notr' },
     { baslik: 'Öğrenciler kodla katılır', metin: 'Tarayıcıdan ya da masaüstü uygulamasından; açık rıza ekranını onaylayan öğrencinin kamerası kendi cihazında çözümlenmeye başlar.', duygu: 'saskin' },
     { baslik: 'Sınıfın nabzını izleyin', metin: 'İfade, dikkat ve sınıfın havası saniye saniye akar. Dersi bölümlere ayırır, yoklama açar, mola verirsiniz; öğrenciler de "Anlamadım" diyebilir ya da söz isteyebilir.', duygu: 'mutlu' },
     { baslik: 'Raporla değerlendirin', metin: 'Ders bitince bölüm bölüm ölçümler, yoklama sonuçları, ısı haritası ve öğrenci özetleri hazırdır. Dönem analitiği dersleri birbiriyle karşılaştırır.', duygu: 'mutlu' },
@@ -231,7 +231,7 @@ function PanelBolumu() {
       <div className="mx-auto max-w-6xl px-4 py-24 sm:px-8">
         <h2 className="max-w-3xl text-5xl font-bold sm:text-6xl">Panel, dikkatinizi gerektiren anı söyler.</h2>
         <p className="mt-5 max-w-2xl text-lg text-soluk">
-          Tek tek yüzlere bakmanız gerekmez. Sezgi kısa dalgalanmaları süzer; bir öğrencinin ifadesi belirlediğiniz süre boyunca olumsuz kalırsa ya da sınıfın büyük kısmı zorlanıyorsa haber verir.
+          Tek tek yüzlere bakmanız gerekmez. Sentio kısa dalgalanmaları süzer; bir öğrencinin ifadesi belirlediğiniz süre boyunca olumsuz kalırsa ya da sınıfın büyük kısmı zorlanıyorsa haber verir.
         </p>
 
         <div className="mt-14 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
@@ -375,7 +375,7 @@ function OgrencininSesi() {
 function Sorumluluk() {
   const maddeler = [
     ['Açık rıza önce gelir', 'Öğrenci, kameranın ne için ve nasıl kullanılacağını okuyup onaylamadan analiz başlamaz. İstediği an duraklatabilir; duraklatınca kamera kapanır.'],
-    ['İfade, duygu değildir', 'Yüz ifadesi iç dünyanın kesin bir göstergesi değildir; model kültüre, ışığa ve açıya göre yanılabilir. Sezgi bu yüzden tek tek karelere değil kalıcı eğilimlere bakar.'],
+    ['İfade, duygu değildir', 'Yüz ifadesi iç dünyanın kesin bir göstergesi değildir; model kültüre, ışığa ve açıya göre yanılabilir. Sentio bu yüzden tek tek karelere değil kalıcı eğilimlere bakar.'],
     ['Notlandırma aracı değildir', 'Raporlar dersin akışını iyileştirmek içindir. Öğrenciyi değerlendirmek, cezalandırmak ya da sıralamak için kullanılmamalıdır.'],
     ['Mevzuata uyun', 'KVKK kapsamında aydınlatma ve açık rıza gerekir. AB Yapay Zekâ Yasası, eğitim kurumlarında duygu çıkarımı yapan sistemleri tıbbi ve güvenlik amaçları dışında yasaklar; AB’de kullanmayın. Araştırmalarda etik kurul onayı alın.'],
   ];
@@ -385,7 +385,7 @@ function Sorumluluk() {
         <div>
           <Maskot duygu="notr" boyut={120} />
           <h2 className="mt-6 text-5xl font-bold">Sorumlu kullanım</h2>
-          <p className="mt-4 text-lg text-soluk">Sezgi akademik bir fikirden doğdu ve öyle kullanılmalı: öğrencinin rızasıyla, öğretmene yardımcı olmak için.</p>
+          <p className="mt-4 text-lg text-soluk">Sentio akademik bir fikirden doğdu ve öyle kullanılmalı: öğrencinin rızasıyla, öğretmene yardımcı olmak için.</p>
         </div>
         <dl className="grid gap-6 sm:grid-cols-2">
           {maddeler.map(([b, m]) => (
@@ -407,7 +407,7 @@ function Sss() {
     ['Öğrenci bilgisayarı yeterince güçlü olmalı mı?', 'Sıradan bir dizüstü yeterlidir. Analiz saniyede yaklaşık altı kare işler ve ekran kartını kullanır; ekran kartı yoksa işlemciye geçer.'],
     ['Veriler nerede ve ne kadar saklanır?', 'Yalnızca sizin sunucunuzdaki SQLite veritabanında. Biten dersler varsayılan olarak 180 gün sonra kendiliğinden silinir; süre ayarlanabilir, dersler panelden hemen silinebilir. Öğrenci dersten ayrılırken kendi verilerinin silinmesini de seçebilir.'],
     ['Yedek nasıl alınır?', 'Yönetici hesabıyla Ayarlar sayfasındaki "Yedek indir" düğmesi, sunucu çalışırken tutarlı bir veritabanı kopyası indirir.'],
-    ['Tarayıcı neden kamera izni vermiyor?', 'Tarayıcılar kamerayı yalnızca https ya da localhost üzerinde açar. Yerel ağda https yoksa Sezgi Masaüstü uygulaması bu kısıtı sizin sunucunuz için güvenle kaldırır.'],
+    ['Tarayıcı neden kamera izni vermiyor?', 'Tarayıcılar kamerayı yalnızca https ya da localhost üzerinde açar. Yerel ağda https yoksa Sentio Masaüstü uygulaması bu kısıtı sizin sunucunuz için güvenle kaldırır.'],
   ];
   return (
     <section className="border-t border-cizgi/60 bg-gece-2/50">

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       etiket:
-        description: 'Sürüm etiketi (ör. v1.1.0). Sürüm yoksa taslak olarak oluşturulur.'
+        description: 'Sürüm etiketi (ör. v1.2.0). Sürüm yoksa taslak olarak oluşturulur.'
         required: true
       platformlar:
         description: 'Üretilecek paketler, boşlukla ayrılmış: sunucu windows linux mac'
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rid: [win-x64, linux-x64, linux-arm64, osx-arm64]
+        rid: [win-x64, linux-x64, linux-arm64]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,20 +36,40 @@ jobs:
         run: npm ci --no-audit --no-fund && npx vite build
       - name: Yayımla
         run: |
-          dotnet publish src/Sezgi.Sunucu -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o yayin/Sezgi-Sunucu-${{ matrix.rid }}
-          rm -f yayin/Sezgi-Sunucu-${{ matrix.rid }}/*.pdb
-          cp betikler/sunucu-oku-beni.txt yayin/Sezgi-Sunucu-${{ matrix.rid }}/OKU-BENI.txt
+          dotnet publish src/Sentio.Sunucu -c Release -r ${{ matrix.rid }} --self-contained -p:PublishSingleFile=true -o yayin/Sentio-Sunucu-${{ matrix.rid }}
+          rm -f yayin/Sentio-Sunucu-${{ matrix.rid }}/*.pdb
+          cp betikler/sunucu-oku-beni.txt yayin/Sentio-Sunucu-${{ matrix.rid }}/OKU-BENI.txt
           cd yayin
           if [[ "${{ matrix.rid }}" == win-* ]]; then
-            (cd Sezgi-Sunucu-${{ matrix.rid }} && zip -qr ../Sezgi-Sunucu-${{ matrix.rid }}.zip .)
+            (cd Sentio-Sunucu-${{ matrix.rid }} && zip -qr ../Sentio-Sunucu-${{ matrix.rid }}.zip .)
           else
-            cp ../betikler/sezgi.service Sezgi-Sunucu-${{ matrix.rid }}/
-            tar -czf Sezgi-Sunucu-${{ matrix.rid }}.tar.gz Sezgi-Sunucu-${{ matrix.rid }}
+            cp ../betikler/sentio.service Sentio-Sunucu-${{ matrix.rid }}/
+            tar -czf Sentio-Sunucu-${{ matrix.rid }}.tar.gz Sentio-Sunucu-${{ matrix.rid }}
           fi
+
+      # Paketlenmiş sunucu açılmalı, adını ve sürümünü bildirmeli, arayüzü ve modelleri sunmalı.
+      - name: Paketi dene
+        if: matrix.rid == 'linux-x64'
+        working-directory: yayin/Sentio-Sunucu-linux-x64
+        env:
+          Urls: http://127.0.0.1:5757
+          Sentio__AgDuyurusu: 'false'
+        run: |
+          ./Sentio.Sunucu > "$RUNNER_TEMP/sunucu.log" 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:5757/saglik > "$RUNNER_TEMP/saglik.json" && break; sleep 1; done
+          cat "$RUNNER_TEMP/saglik.json"; echo
+          grep -q '"ad":"Sentio"' "$RUNNER_TEMP/saglik.json"
+          curl -sf -o /dev/null http://127.0.0.1:5757/
+          curl -sf -o /dev/null http://127.0.0.1:5757/modeller/emotion.json
+          test -f veri/sentio.db
+          kill %1
+          tail -5 "$RUNNER_TEMP/sunucu.log"
+          rm -rf veri indirmeler
+
       - uses: actions/upload-artifact@v4
         with:
           name: sunucu-${{ matrix.rid }}
-          path: yayin/Sezgi-Sunucu-*.*
+          path: yayin/Sentio-Sunucu-*.*
 
   masaustu:
     strategy:
@@ -86,6 +106,18 @@ jobs:
           npm run simge
           npx electron-builder ${{ matrix.hedef }} --publish never
 
+      - name: Paketi dene (Windows)
+        if: env.SECILDI == 'true' && matrix.platform == 'windows'
+        working-directory: masaustu/dist
+        shell: pwsh
+        run: |
+          $surec = Start-Process -FilePath win-unpacked/Sentio.exe -PassThru
+          Start-Sleep -Seconds 20
+          # Uygulama 20 sn sonra hâlâ açık olmalı.
+          if ($surec.HasExited) { throw "Uygulama kapandı, çıkış kodu $($surec.ExitCode)" }
+          Get-Process Sentio | Select-Object Id, MainWindowTitle | Format-Table
+          Stop-Process -Name Sentio -Force
+
       # AppImage hem kullanıcı ad alanlarının kısıtlı olduğu (Ubuntu 24.04 masaüstü) hem de açık olduğu
       # sistemlerde açılmalı. Başlatıcı, korumalı alan kullanılamıyorsa onu kendisi kapatır.
       - name: Paketi dene (Linux)
@@ -93,11 +125,11 @@ jobs:
         working-directory: masaustu/dist
         run: |
           command -v fusermount3 >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq fuse3)
-          chmod +x Sezgi-Masaustu-linux-x64.AppImage
+          chmod +x Sentio-Masaustu-linux-x64.AppImage
           dene() {
-            ( sleep 15; pgrep -af '\.mount_.*/sezgi' | head -1 > "$RUNNER_TEMP/surec.txt" ) &
+            ( sleep 15; pgrep -af '\.mount_.*/sentio' | head -1 > "$RUNNER_TEMP/surec.txt" ) &
             set +e
-            timeout --kill-after=5 25 xvfb-run -a ./Sezgi-Masaustu-linux-x64.AppImage > "$RUNNER_TEMP/calisma.log" 2>&1
+            timeout --kill-after=5 25 xvfb-run -a ./Sentio-Masaustu-linux-x64.AppImage > "$RUNNER_TEMP/calisma.log" 2>&1
             kod=$?
             set -e
             wait
@@ -121,17 +153,17 @@ jobs:
         working-directory: masaustu/dist
         run: |
           for mimari in arm64 x64; do
-            nokta="/tmp/sezgi-$mimari"
-            hdiutil attach "Sezgi-Masaustu-mac-$mimari.dmg" -nobrowse -readonly -mountpoint "$nokta" >/dev/null
-            uygulama="$nokta/Sezgi.app"
-            echo "--- $mimari: $(lipo -archs "$uygulama/Contents/MacOS/Sezgi")"
-            [ "$(lipo -archs "$uygulama/Contents/MacOS/Sezgi")" = "$([ $mimari = x64 ] && echo x86_64 || echo arm64)" ]
+            nokta="/tmp/sentio-$mimari"
+            hdiutil attach "Sentio-Masaustu-mac-$mimari.dmg" -nobrowse -readonly -mountpoint "$nokta" >/dev/null
+            uygulama="$nokta/Sentio.app"
+            echo "--- $mimari: $(lipo -archs "$uygulama/Contents/MacOS/Sentio")"
+            [ "$(lipo -archs "$uygulama/Contents/MacOS/Sentio")" = "$([ $mimari = x64 ] && echo x86_64 || echo arm64)" ]
             codesign -dv "$uygulama" 2>&1 | grep -E '^(Identifier|Signature)'
             codesign --verify --deep --strict "$uygulama"
             /usr/libexec/PlistBuddy -c 'Print :NSCameraUsageDescription' "$uygulama/Contents/Info.plist"
             echo "en düşük macOS: $(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$uygulama/Contents/Info.plist")"
           done
-          "/tmp/sezgi-arm64/Sezgi.app/Contents/MacOS/Sezgi" > "$RUNNER_TEMP/calisma.log" 2>&1 &
+          "/tmp/sentio-arm64/Sentio.app/Contents/MacOS/Sentio" > "$RUNNER_TEMP/calisma.log" 2>&1 &
           pid=$!
           sleep 20
           tail -15 "$RUNNER_TEMP/calisma.log"
@@ -139,15 +171,15 @@ jobs:
           kill -0 "$pid"
           kill "$pid"
           sleep 2
-          hdiutil detach /tmp/sezgi-arm64 >/dev/null
-          hdiutil detach /tmp/sezgi-x64 >/dev/null
+          hdiutil detach /tmp/sentio-arm64 >/dev/null
+          hdiutil detach /tmp/sentio-x64 >/dev/null
 
       - uses: actions/upload-artifact@v4
         if: env.SECILDI == 'true'
         with:
           name: masaustu-${{ matrix.platform }}
           path: |
-            masaustu/dist/Sezgi-Masaustu-*
+            masaustu/dist/Sentio-Masaustu-*
             masaustu/dist/latest*.yml
             !masaustu/dist/*.dmg.blockmap
             !masaustu/dist/latest-mac.yml
@@ -168,5 +200,5 @@ jobs:
         run: |
           ls -l paketler
           gh release view "$ETIKET" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
-            gh release create "$ETIKET" --repo "$GITHUB_REPOSITORY" --draft --title "Sezgi $ETIKET" --notes "Sürüm notları eklenecek."
+            gh release create "$ETIKET" --repo "$GITHUB_REPOSITORY" --draft --title "Sentio $ETIKET" --notes "Sürüm notları eklenecek."
           gh release upload "$ETIKET" paketler/* --repo "$GITHUB_REPOSITORY" --clobber

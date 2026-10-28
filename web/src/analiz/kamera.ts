@@ -43,7 +43,7 @@ export function kameraHataMesaji(e: unknown): string {
   if (ad === 'NotFoundError' || ad === 'OverconstrainedError') return 'Bu cihazda kullanılabilir bir kamera bulunamadı.';
   if (ad === 'NotReadableError') return 'Kamera başka bir uygulama tarafından kullanılıyor. O uygulamada kamerayı kapatıp yeniden deneyin.';
   if (!window.isSecureContext)
-    return 'Tarayıcılar kameraya yalnızca güvenli bağlantıda (https) izin verir. Öğretmeninizden https adresini isteyin ya da Sezgi masaüstü istemcisini kullanın.';
+    return 'Tarayıcılar kameraya yalnızca güvenli bağlantıda (https) izin verir. Öğretmeninizden https adresini isteyin ya da Sentio masaüstü istemcisini kullanın.';
   return `Analiz başlatılamadı: ${(e as Error)?.message ?? e}`;
 }
 

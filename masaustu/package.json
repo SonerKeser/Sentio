@@ -1,11 +1,11 @@
 {
-  "name": "sezgi-masaustu",
-  "productName": "Sezgi",
-  "version": "1.1.0",
-  "description": "Sezgi masaüstü istemcisi: öğrenci ve öğretmen bilgisayarları için",
+  "name": "sentio-masaustu",
+  "productName": "Sentio",
+  "version": "1.2.0",
+  "description": "Sentio masaüstü istemcisi: öğrenci ve öğretmen bilgisayarları için",
   "author": "Soner Keser",
   "license": "MIT",
-  "homepage": "https://github.com/SonerKeser/Sezgi",
+  "homepage": "https://github.com/SonerKeser/Sentio",
   "main": "src/ana.js",
   "scripts": {
     "basla": "electron .",
@@ -24,7 +24,7 @@
   },
   "build": {
     "appId": "com.sonerkeser.sezgi",
-    "productName": "Sezgi",
+    "productName": "Sentio",
     "copyright": "© 2026 Soner Keser",
     "directories": {
       "output": "dist",
@@ -56,13 +56,13 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "Sezgi-Masaustu-Kurulum.exe",
-      "shortcutName": "Sezgi",
-      "uninstallDisplayName": "Sezgi",
+      "artifactName": "Sentio-Masaustu-Kurulum.exe",
+      "shortcutName": "Sentio",
+      "uninstallDisplayName": "Sentio",
       "deleteAppDataOnUninstall": false
     },
     "portable": {
-      "artifactName": "Sezgi-Masaustu-Tasinabilir.exe"
+      "artifactName": "Sentio-Masaustu-Tasinabilir.exe"
     },
     "toolsets": {
       "appimage": "1.0.3"
@@ -78,9 +78,9 @@
       ],
       "category": "Education",
       "icon": "simge/simge.png",
-      "executableName": "sezgi",
+      "executableName": "sentio",
       "synopsis": "Sınıf duygu ve dikkat analitiği istemcisi",
-      "artifactName": "Sezgi-Masaustu-linux-x64.AppImage"
+      "artifactName": "Sentio-Masaustu-linux-x64.AppImage"
     },
     "mac": {
       "target": [
@@ -97,18 +97,18 @@
       "identity": "-",
       "hardenedRuntime": false,
       "extendInfo": {
-        "NSCameraUsageDescription": "Sezgi, derse katıldığınızda yüz ifadenizi bu bilgisayarda çözümlemek için kamerayı kullanır. Görüntü kaydedilmez ve hiçbir yere gönderilmez."
+        "NSCameraUsageDescription": "Sentio, derse katıldığınızda yüz ifadenizi bu bilgisayarda çözümlemek için kamerayı kullanır. Görüntü kaydedilmez ve hiçbir yere gönderilmez."
       },
-      "artifactName": "Sezgi-Masaustu-mac-${arch}.dmg"
+      "artifactName": "Sentio-Masaustu-mac-${arch}.dmg"
     },
     "dmg": {
-      "title": "Sezgi"
+      "title": "Sentio"
     },
     "publish": [
       {
         "provider": "github",
         "owner": "SonerKeser",
-        "repo": "Sezgi"
+        "repo": "Sentio"
       }
     ]
   }

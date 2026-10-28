@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>Soner Keser</Authors>
-    <Product>Sezgi</Product>
+    <Product>Sentio</Product>
     <Copyright>© 2026 Soner Keser</Copyright>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

@@ -1,6 +1,6 @@
 (async () => {
   const izgara = document.getElementById('izgara');
-  const { kaynaklar, izinGerekli } = await window.sezgi.kaynaklar();
+  const { kaynaklar, izinGerekli } = await window.sentio.kaynaklar();
   document.getElementById('izin').hidden = !izinGerekli;
   if (kaynaklar.length === 0) {
     document.getElementById('yukleniyor').textContent = 'Paylaşılabilecek bir pencere bulunamadı.';
@@ -27,10 +27,10 @@
       }
       ad.append(k.ekran && !/ekran|screen/i.test(k.ad) ? `Ekran: ${k.ad}` : k.ad);
       d.append(resim, ad);
-      d.addEventListener('click', () => window.sezgi.sec(k.id));
+      d.addEventListener('click', () => window.sentio.sec(k.id));
       return d;
     }),
   );
-  document.getElementById('vazgec').addEventListener('click', () => window.sezgi.sec(null));
-  document.addEventListener('keydown', (e) => e.key === 'Escape' && window.sezgi.sec(null));
+  document.getElementById('vazgec').addEventListener('click', () => window.sentio.sec(null));
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && window.sentio.sec(null));
 })();

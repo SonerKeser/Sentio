@@ -8,7 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 /** Tarayıcıda çalışan analiz için gereken Human modelleri (yüz bulma, yüz ağı, iris, ifade, yüz tanımlayıcı). */
 const MODELLER = ['blazeface', 'facemesh', 'iris', 'emotion', 'faceres'];
 const MODEL_KLASORU = path.resolve(__dirname, 'node_modules/@vladmandic/human/models');
-const SUNUCU = process.env.SEZGI_SUNUCU ?? 'http://localhost:5757';
+const SUNUCU = process.env.SENTIO_SUNUCU ?? 'http://localhost:5757';
 
 /**
  * Modelleri node_modules'tan doğrudan sunar ve derlemede /modeller altına kopyalar.
@@ -17,7 +17,7 @@ const SUNUCU = process.env.SEZGI_SUNUCU ?? 'http://localhost:5757';
 function humanModelleri(kopyala: boolean): Plugin {
   const dosyalar = MODELLER.flatMap((m) => [`${m}.json`, `${m}.bin`]);
   return {
-    name: 'sezgi-human-modelleri',
+    name: 'sentio-human-modelleri',
     configureServer(sunucu) {
       sunucu.middlewares.use('/modeller', (istek, yanit, sonraki) => {
         const ad = path.basename((istek.url ?? '').split('?')[0]);
@@ -38,13 +38,13 @@ function humanModelleri(kopyala: boolean): Plugin {
 export default defineConfig(({ mode }) => {
   const tanitim = mode === 'tanitim';
   return {
-    base: tanitim ? (process.env.SEZGI_TABAN ?? '/Sezgi/') : '/',
+    base: tanitim ? (process.env.SENTIO_TABAN ?? '/Sentio/') : '/',
     plugins: [react(), tailwindcss(), humanModelleri(!tanitim)],
     define: {
       __SURUM__: JSON.stringify(JSON.parse(readFileSync(path.resolve(__dirname, 'package.json'), 'utf8')).version),
     },
     build: {
-      outDir: tanitim ? 'dist-tanitim' : '../src/Sezgi.Sunucu/wwwroot',
+      outDir: tanitim ? 'dist-tanitim' : '../src/Sentio.Sunucu/wwwroot',
       emptyOutDir: true,
       chunkSizeWarningLimit: 4000,
     },

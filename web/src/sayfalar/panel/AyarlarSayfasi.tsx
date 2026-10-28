@@ -17,7 +17,7 @@ export default function AyarlarSayfasi() {
       <section className="yuzey p-6">
         <h2 className="text-xl font-semibold">Bu sunucu hakkında</h2>
         <p className="mt-2 text-soluk">
-          Sezgi sürüm <span className="rakam font-semibold text-metin">{surum}</span>. Ders ayarları (kalıcılık eşiği, izlenen ifadeler, anonim mod) her dersin kendi panelinden değiştirilir. Veri saklama süresi ve
+          Sentio sürüm <span className="rakam font-semibold text-metin">{surum}</span>. Ders ayarları (kalıcılık eşiği, izlenen ifadeler, anonim mod) her dersin kendi panelinden değiştirilir. Veri saklama süresi ve
           https sertifikası sunucunun <code className="rounded bg-gece px-1.5 py-0.5 text-sm">appsettings.json</code> dosyasından ayarlanır.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
@@ -61,7 +61,7 @@ function SunucuBolumu() {
           <h2 className="flex items-center gap-2 text-xl font-semibold">
             <Database size={20} className="text-gunes" /> Sunucu
           </h2>
-          <p className="mt-1 text-sm text-silik">Yedek, sunucu çalışırken alınabilen tutarlı bir SQLite dosyasıdır. Geri yüklemek için sunucuyu durdurup veri klasöründeki sezgi.db ile değiştirin.</p>
+          <p className="mt-1 text-sm text-silik">Yedek, sunucu çalışırken alınabilen tutarlı bir SQLite dosyasıdır. Geri yüklemek için sunucuyu durdurup veri klasöründeki sentio.db ile değiştirin.</p>
         </div>
         <a href="/api/yonetim/yedek" className="inline-flex h-10 items-center gap-2 rounded-pill bg-gunes px-4 font-semibold text-gece hover:bg-gunes-koyu">
           <HardDriveDownload size={18} /> Yedek indir

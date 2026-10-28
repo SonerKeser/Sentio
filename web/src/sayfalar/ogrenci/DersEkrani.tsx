@@ -34,7 +34,7 @@ export function DersEkrani({ katilim, bitti }: { katilim: KatilimYaniti; bitti: 
   const [duraklatildi, setDuraklatildi] = useState(false);
   const [baglanti, setBaglanti] = useState<BaglantiDurumu>('baglaniyor');
   const [durtme, setDurtme] = useState<DurtmeIcerigi | null>(null);
-  const [onizleme, setOnizleme] = useKalici('sezgi.onizleme', true);
+  const [onizleme, setOnizleme] = useKalici('sentio.onizleme', true);
   const hubRef = useRef<HubConnection | null>(null);
   const bittiRef = useRef(bitti);
   bittiRef.current = bitti;

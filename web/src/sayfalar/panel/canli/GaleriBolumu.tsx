@@ -19,7 +19,7 @@ interface Ozellikler {
 }
 
 /**
- * Öğrencilerin Sezgi istemcisi kuramadığı derslerde, öğretmen video konferans penceresini paylaşır;
+ * Öğrencilerin Sentio istemcisi kuramadığı derslerde, öğretmen video konferans penceresini paylaşır;
  * galerideki yüzler bu tarayıcıda çözümlenir. Eski sistemin ekran görüntüsü yaklaşımının çağdaş karşılığı.
  */
 export function GaleriBolumu(o: Ozellikler) {

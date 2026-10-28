@@ -30,7 +30,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - working-directory: web
         env:
-          SEZGI_TABAN: /${{ github.event.repository.name }}/
+          SENTIO_TABAN: /${{ github.event.repository.name }}/
         run: |
           npm run build:tanitim
           cp dist-tanitim/index.html dist-tanitim/404.html

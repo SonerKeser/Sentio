@@ -61,7 +61,7 @@ export function KatilimPenceresi({ acik, kapat, oturum }: { acik: boolean; kapat
           {guvensiz && (
             <p className="flex gap-2.5 rounded-xl border border-d-mutlu/30 bg-d-mutlu/[0.07] p-3 text-sm text-metin/85">
               <TriangleAlert size={18} className="mt-0.5 shrink-0 text-d-mutlu" />
-              Tarayıcılar kamerayı yalnızca güvenli (https) adreslerde açar. Yerel ağda öğrencilerin Sezgi masaüstü istemcisini kullanmasını ya da sunucuyu https ile yayınlamanızı öneririz.
+              Tarayıcılar kamerayı yalnızca güvenli (https) adreslerde açar. Yerel ağda öğrencilerin Sentio masaüstü istemcisini kullanmasını ya da sunucuyu https ile yayınlamanızı öneririz.
             </p>
           )}
         </div>

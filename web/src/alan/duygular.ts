@@ -26,7 +26,7 @@ export const DUYGU: Record<Duygu, DuyguBilgisi> = {
 /** Grafiklerde alttan üste sıra: olumlular, nötr, olumsuzlar. Olumsuz ifadeler yükseldikçe üst kenardan aşağı doğru büyür. */
 export const YIGIN_SIRASI: Duygu[] = ['mutlu', 'saskin', 'notr', 'igrenme', 'korku', 'uzgun', 'ofkeli'];
 
-/** Human kütüphanesinin sınıf adlarından Sezgi sırasına eşleme. */
+/** Human kütüphanesinin sınıf adlarından Sentio sırasına eşleme. */
 export const HUMAN_ESLEME: Record<string, Duygu> = {
   neutral: 'notr',
   happy: 'mutlu',

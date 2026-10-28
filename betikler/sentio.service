@@ -1,0 +1,21 @@
+# Sentio sunucusunu systemd hizmeti olarak çalıştırmak için:
+#   sudo cp -r Sentio-Sunucu-linux-x64 /opt/sentio
+#   sudo useradd --system --home /opt/sentio sentio && sudo chown -R sentio /opt/sentio
+#   sudo cp /opt/sentio/sentio.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now sentio
+[Unit]
+Description=Sentio sinif duygu ve dikkat analitigi sunucusu
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=sentio
+WorkingDirectory=/opt/sentio
+ExecStart=/opt/sentio/Sentio.Sunucu
+Environment=Sentio__AcilistaTarayiciAc=false
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

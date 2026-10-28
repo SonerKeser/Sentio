@@ -32,7 +32,7 @@ jobs:
         working-directory: web
         run: npm run build
       - name: Sunucu testleri
-        run: dotnet test tests/Sezgi.Sunucu.Testleri -c Release
+        run: dotnet test tests/Sentio.Sunucu.Testleri -c Release
 
   masaustu:
     runs-on: ubuntu-latest

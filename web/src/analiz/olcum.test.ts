@@ -6,7 +6,7 @@ import { baskin, katilim, valans } from '../alan/duygular';
 const olcum = (mutlu = 0.8) => ({ d: [1 - mutlu, mutlu, 0, 0, 0, 0, 0], dikkat: 0.9, goz: 0.9, yawDerece: 0, pitchDerece: 0 });
 
 describe('ifade olasılıkları', () => {
-  it('Human sınıflarını Sezgi sırasına çevirir ve normalleştirir', () => {
+  it('Human sınıflarını Sentio sırasına çevirir ve normalleştirir', () => {
     const d = olasiliklar([
       { emotion: 'sad', score: 0.6 },
       { emotion: 'neutral', score: 0.2 },

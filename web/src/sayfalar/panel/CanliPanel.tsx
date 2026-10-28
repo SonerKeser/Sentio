@@ -35,7 +35,7 @@ export default function CanliPanel() {
   const [simulasyon, setSimulasyon] = useState(false);
   const [bitirOnayi, setBitirOnayi] = useState(false);
   const [galeriAcik, setGaleriAcik] = useState(false);
-  const [bildirimAcik, setBildirimAcik] = useKalici('sezgi.bildirimler', false);
+  const [bildirimAcik, setBildirimAcik] = useKalici('sentio.bildirimler', false);
   const simdi = useZamanlayici(1000);
   useOgretmenBildirimleri(bildirimAcik, uyarilar, anlik?.etkilesim.sorular ?? []);
 
@@ -55,7 +55,7 @@ export default function CanliPanel() {
     }
     const izin = await bildirimIzniIste();
     setBildirimAcik(true);
-    bildir(izin ? 'Sezgi arka plandayken uyarılar ve söz istekleri bildirilecek.' : 'Sistem bildirimine izin verilmedi; yalnızca sesli uyarı çalınacak.', 'bilgi');
+    bildir(izin ? 'Sentio arka plandayken uyarılar ve söz istekleri bildirilecek.' : 'Sistem bildirimine izin verilmedi; yalnızca sesli uyarı çalınacak.', 'bilgi');
   };
 
   const galeriGonder = useCallback(

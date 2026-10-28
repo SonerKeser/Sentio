@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  Sezgi sürüm dosyalarını üretir: sunucu (Windows x64, Linux x64, Linux ARM64) ve masaüstü istemcisi (Windows).
+  Sentio sürüm dosyalarını üretir: sunucu (Windows x64, Linux x64, Linux ARM64) ve masaüstü istemcisi (Windows).
 .EXAMPLE
   pwsh betikler/paketle.ps1
   pwsh betikler/paketle.ps1 -MasaustuAtla
@@ -34,22 +34,22 @@ Pop-Location
 
 if (-not $TestAtla) {
     Adim 'Sunucu testleri'
-    Calistir dotnet test tests/Sezgi.Sunucu.Testleri -c Release
+    Calistir dotnet test tests/Sentio.Sunucu.Testleri -c Release
 }
 
 $ara = Join-Path $kok 'cikti/ara'
 foreach ($rid in 'win-x64', 'linux-x64', 'linux-arm64') {
     Adim "Sunucu yayımlanıyor: $rid"
-    $hedef = Join-Path $ara "Sezgi-Sunucu-$rid"
+    $hedef = Join-Path $ara "Sentio-Sunucu-$rid"
     if (Test-Path $hedef) { Remove-Item -Recurse -Force $hedef }
-    Calistir dotnet publish src/Sezgi.Sunucu -c Release -r $rid --self-contained -p:PublishSingleFile=true -o $hedef
+    Calistir dotnet publish src/Sentio.Sunucu -c Release -r $rid --self-contained -p:PublishSingleFile=true -o $hedef
     Get-ChildItem $hedef -Filter *.pdb | Remove-Item
     Copy-Item betikler/sunucu-oku-beni.txt (Join-Path $hedef 'OKU-BENI.txt')
     if ($rid -like 'linux-*') {
-        Copy-Item betikler/sezgi.service $hedef
-        Calistir python -I betikler/tar-olustur.py $hedef (Join-Path $cikti "Sezgi-Sunucu-$rid.tar.gz")
+        Copy-Item betikler/sentio.service $hedef
+        Calistir python -I betikler/tar-olustur.py $hedef (Join-Path $cikti "Sentio-Sunucu-$rid.tar.gz")
     } else {
-        $zip = Join-Path $cikti "Sezgi-Sunucu-$rid.zip"
+        $zip = Join-Path $cikti "Sentio-Sunucu-$rid.zip"
         if (Test-Path $zip) { Remove-Item $zip }
         Compress-Archive -Path (Join-Path $hedef '*') -DestinationPath $zip -CompressionLevel Optimal
     }
@@ -63,7 +63,7 @@ if (-not $MasaustuAtla) {
     $env:CSC_IDENTITY_AUTO_DISCOVERY = 'false'
     Calistir npx electron-builder --win --x64 --publish never
     Pop-Location
-    Copy-Item masaustu/dist/Sezgi-Masaustu-Kurulum.exe, masaustu/dist/Sezgi-Masaustu-Kurulum.exe.blockmap, masaustu/dist/Sezgi-Masaustu-Tasinabilir.exe, masaustu/dist/latest.yml $cikti
+    Copy-Item masaustu/dist/Sentio-Masaustu-Kurulum.exe, masaustu/dist/Sentio-Masaustu-Kurulum.exe.blockmap, masaustu/dist/Sentio-Masaustu-Tasinabilir.exe, masaustu/dist/latest.yml $cikti
 }
 
 Remove-Item -Recurse -Force $ara

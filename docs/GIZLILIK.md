@@ -1,6 +1,6 @@
 # Gizlilik, etik ve mevzuat
 
-Sezgi, öğrencilerin yüz ifadesini çözümleyen bir sistemdir. Bu, dikkatle ele alınması gereken bir iştir. Bu belge sistemin tasarımdaki güvencelerini ve kurumların kullanmadan önce yapması gerekenleri özetler. Hukuki danışmanlık yerine geçmez.
+Sentio, öğrencilerin yüz ifadesini çözümleyen bir sistemdir. Bu, dikkatle ele alınması gereken bir iştir. Bu belge sistemin tasarımdaki güvencelerini ve kurumların kullanmadan önce yapması gerekenleri özetler. Hukuki danışmanlık yerine geçmez.
 
 ## Tasarımdaki güvenceler
 
@@ -22,9 +22,9 @@ Sezgi, öğrencilerin yüz ifadesini çözümleyen bir sistemdir. Bu, dikkatle e
 
 - Yüz ifadesi iç duygu durumunun güvenilir bir göstergesi değildir. Aynı his farklı kişilerde, kültürlerde ve bağlamlarda farklı ifade edilir.
 - Model ışık, açı, gözlük, maske ve kamera kalitesinden etkilenir; bazı gruplarda daha yüksek hata oranı gösterebilir.
-- Bu nedenle Sezgi "üzgün" demez, "üzgün görünüyor" der; tekil kareler yerine kalıcı eğilimlere bakar ve uyarıları destek amaçlı tutar.
+- Bu nedenle Sentio "üzgün" demez, "üzgün görünüyor" der; tekil kareler yerine kalıcı eğilimlere bakar ve uyarıları destek amaçlı tutar.
 
-**Sezgi bir değerlendirme, notlandırma ya da disiplin aracı değildir ve böyle kullanılmamalıdır.**
+**Sentio bir değerlendirme, notlandırma ya da disiplin aracı değildir ve böyle kullanılmamalıdır.**
 
 ## Mevzuat
 
@@ -36,7 +36,7 @@ Sezgi, öğrencilerin yüz ifadesini çözümleyen bir sistemdir. Bu, dikkatle e
 
 ### Avrupa Birliği: Yapay Zekâ Yasası
 
-AB Yapay Zekâ Yasası'nın (Tüzük 2024/1689) 5(1)(f) maddesi, 2 Şubat 2025'ten bu yana **işyerlerinde ve eğitim kurumlarında** kişilerin duygularını çıkaran yapay zekâ sistemlerinin kullanımını, tıbbi ya da güvenlik gerekçeleri dışında **yasaklar**. Sezgi'yi AB'deki eğitim kurumlarında kullanmayın.
+AB Yapay Zekâ Yasası'nın (Tüzük 2024/1689) 5(1)(f) maddesi, 2 Şubat 2025'ten bu yana **işyerlerinde ve eğitim kurumlarında** kişilerin duygularını çıkaran yapay zekâ sistemlerinin kullanımını, tıbbi ya da güvenlik gerekçeleri dışında **yasaklar**. Sentio'yu AB'deki eğitim kurumlarında kullanmayın.
 
 ### Araştırma kullanımı
 
@@ -44,4 +44,4 @@ Akademik çalışmalarda etik kurul onayı alın; katılımcı bilgilendirme for
 
 ## Örnek aydınlatma metni
 
-> Bu derste, isteğe bağlı olarak Sezgi uygulaması kullanılmaktadır. Uygulama, kameranızdan alınan görüntüyü yalnızca kendi cihazınızda işleyerek yüzünüzdeki görünür ifadeyi yedi sınıfta tahmin eder ve ekrana bakma durumunuzu değerlendirir. Görüntünüz kaydedilmez ve hiçbir yere gönderilmez. Öğretmeninize ve okul sunucusuna yalnızca bu tahminlerin sayısal değerleri gider. Amaç, dersin akışını iyileştirmektir; veriler not verme ya da değerlendirme için kullanılmaz. Analizi istediğiniz an duraklatabilir ya da dersten ayrılabilirsiniz. Veriler [N] gün sonra silinir. Sorularınız için: [iletişim].
+> Bu derste, isteğe bağlı olarak Sentio uygulaması kullanılmaktadır. Uygulama, kameranızdan alınan görüntüyü yalnızca kendi cihazınızda işleyerek yüzünüzdeki görünür ifadeyi yedi sınıfta tahmin eder ve ekrana bakma durumunuzu değerlendirir. Görüntünüz kaydedilmez ve hiçbir yere gönderilmez. Öğretmeninize ve okul sunucusuna yalnızca bu tahminlerin sayısal değerleri gider. Amaç, dersin akışını iyileştirmektir; veriler not verme ya da değerlendirme için kullanılmaz. Analizi istediğiniz an duraklatabilir ya da dersten ayrılabilirsiniz. Veriler [N] gün sonra silinir. Sorularınız için: [iletişim].

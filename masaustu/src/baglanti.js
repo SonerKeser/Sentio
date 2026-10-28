@@ -19,18 +19,18 @@ async function baglan(adres) {
   $('hata').textContent = '';
   $('baglan').disabled = true;
   $('baglan').textContent = 'Bağlanıyor…';
-  const sonuc = await window.sezgi.dene(adres);
+  const sonuc = await window.sentio.dene(adres);
   if (!sonuc.tamam) {
     $('hata').textContent = sonuc.hata;
     $('baglan').disabled = false;
     $('baglan').textContent = 'Bağlan';
     return;
   }
-  await window.sezgi.baglan(sonuc.koken, rol);
+  await window.sentio.baglan(sonuc.koken, rol);
 }
 
 async function bulunanlariGoster() {
-  const ayarlar = await window.sezgi.ayarlar();
+  const ayarlar = await window.sentio.ayarlar();
   const liste = ayarlar.bulunan ?? [];
   $('bulunanBolum').hidden = liste.length === 0;
   $('bulunan').replaceChildren(
@@ -44,7 +44,7 @@ async function bulunanlariGoster() {
       metin.textContent = s.koken.replace(/^https?:\/\//, '');
       const alt = document.createElement('small');
       const diger = s.digerleri?.length ? `${s.digerleri.length} başka adres daha` : '';
-      alt.textContent = [s.makine, s.surum && `Sezgi ${s.surum}`, diger].filter(Boolean).join(', ');
+      alt.textContent = [s.makine, s.surum && `Sentio ${s.surum}`, diger].filter(Boolean).join(', ');
       metin.append(alt);
       d.append(nokta, metin);
       d.addEventListener('click', () => baglan(s.koken));
@@ -54,11 +54,11 @@ async function bulunanlariGoster() {
 }
 
 (async () => {
-  const ayarlar = await window.sezgi.ayarlar();
+  const ayarlar = await window.sentio.ayarlar();
   rolSec(ayarlar.rol || 'ogrenci');
   if (ayarlar.sunucu) $('adres').value = ayarlar.sunucu.replace(/^http:\/\//, '');
   $('sonlar').replaceChildren(...(ayarlar.sonSunucular || []).map((s) => yonga(s.replace(/^https?:\/\//, ''), () => baglan(s))));
-  $('surum').textContent = `Sezgi Masaüstü ${ayarlar.surum}`;
+  $('surum').textContent = `Sentio Masaüstü ${ayarlar.surum}`;
   const hata = new URLSearchParams(location.search).get('hata');
   if (hata) $('hata').textContent = hata;
 

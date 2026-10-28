@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sentio.Sunucu/Sentio.Sunucu.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sentio.Sunucu.Testleri/Sentio.Sunucu.Testleri.csproj" />
+  </Folder>
+</Solution>

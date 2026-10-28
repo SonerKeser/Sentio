@@ -97,7 +97,7 @@ interface Ozellikler {
 }
 
 /**
- * Sezgi'nin maskotu: ifadesini duygu sınıfına göre değiştiren yumuşak bir damla. Öğrenciye kendi
+ * Sentio'nun maskotu: ifadesini duygu sınıfına göre değiştiren yumuşak bir damla. Öğrenciye kendi
  * ifadesini yansıtır, öğretmen panelinde her öğrencinin anlık ifadesini gösterir.
  */
 export function Maskot({ duygu = 'notr', boyut = 160, durum = 'aktif', canli = true, bakis, etiket, className }: Ozellikler) {

@@ -13,7 +13,7 @@ export const KAYNAK_SIMGESI = {
   simulasyon: <Bot size={13} />,
 };
 
-export const KAYNAK_ADI = { kamera: 'Sezgi istemcisi', galeri: 'Galeri analizi', simulasyon: 'Sanal öğrenci' };
+export const KAYNAK_ADI = { kamera: 'Sentio istemcisi', galeri: 'Galeri analizi', simulasyon: 'Sanal öğrenci' };
 
 export function maskotDurumu(k: KatilimciAnligi): MaskotDurumu {
   if (k.durum === 'duraklatildi' || k.durum === 'molada') return 'duraklatildi';

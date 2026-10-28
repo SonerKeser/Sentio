@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-  subgraph Ogrenci["Öğrenci cihazı (tarayıcı ya da Sezgi Masaüstü)"]
+  subgraph Ogrenci["Öğrenci cihazı (tarayıcı ya da Sentio Masaüstü)"]
     K[Kamera] --> M["Human / TensorFlow.js<br/>yüz bulma · 468 noktalı yüz ağı · iris · ifade"]
     M --> T["Toplayıcı<br/>1 sn'lik ortalama"]
   end
@@ -10,7 +10,7 @@ flowchart LR
     P[Canlı panel]
     G["Galeri analizi<br/>ekran paylaşımı + döşemeli tarama + yüz izleyici"]
   end
-  subgraph Sunucu["Sezgi Sunucu (.NET 10)"]
+  subgraph Sunucu["Sentio Sunucu (.NET 10)"]
     H1["/hub/ogrenci"] --> I[Ölçüm işleyici]
     H2["/hub/ogretmen"] --> I
     I --> R[Kural motoru]
@@ -40,7 +40,7 @@ flowchart LR
 
 ## Bileşenler
 
-### Sunucu (`src/Sezgi.Sunucu`)
+### Sunucu (`src/Sentio.Sunucu`)
 
 | Klasör | İçerik |
 | --- | --- |
@@ -87,7 +87,7 @@ Analiz motoru yalnızca gerektiğinde yüklenir (tanıtım sayfası ~160 KB gzip
 
 Electron 45. Arayüz sunucudan yüklenir; uygulama şunları ekler:
 
-- Yerel ağda https olmadan kamera (yalnızca seçilen Sezgi sunucusu güvenli köken sayılır),
+- Yerel ağda https olmadan kamera (yalnızca seçilen Sentio sunucusu güvenli köken sayılır),
 - Arka planda çalışmayı sürdürme (sistem tepsisi, zamanlayıcı kısıtlaması kapalı),
 - Destek bildiriminde pencereyi öne getirme ve ardından eski haline döndürme,
 - Galeri analizi için pencere seçici,
@@ -100,7 +100,7 @@ Güvenlik: `contextIsolation`, `sandbox`, `nodeIntegration: false`; sayfaya yaln
 
 ## Etkileşim katmanı
 
-Duygu tahmini öğrencinin iç dünyasını bilemez; Sezgi bunu öğrencinin açık beyanlarıyla tamamlar (`Hizmetler/EtkilesimYoneticisi.cs`).
+Duygu tahmini öğrencinin iç dünyasını bilemez; Sentio bunu öğrencinin açık beyanlarıyla tamamlar (`Hizmetler/EtkilesimYoneticisi.cs`).
 
 | Özellik | Davranış |
 | --- | --- |

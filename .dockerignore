@@ -3,9 +3,9 @@
 **/obj
 **/dist
 **/dist-tanitim
-src/Sezgi.Sunucu/wwwroot
-src/Sezgi.Sunucu/veri
-src/Sezgi.Sunucu/indirmeler
+src/Sentio.Sunucu/wwwroot
+src/Sentio.Sunucu/veri
+src/Sentio.Sunucu/indirmeler
 masaustu
 tests
 cikti

@@ -23,27 +23,27 @@ interface Bilesen {
 /** Sürüm dosyası adları sabittir; "latest/download" bağlantısı her zaman son sürümü indirir. */
 const BILESENLER: Bilesen[] = [
   {
-    ad: 'Sezgi Sunucu',
+    ad: 'Sentio Sunucu',
     rol: 'Okulun ya da öğretmenin bilgisayarında çalışır',
     aciklama: 'Öğretmen panelini, öğrenci web istemcisini ve analiz modellerini barındırır; ölçümleri saklar, kuralları işletir, rapor üretir. Kurulum gerektirmez, internetsiz yerel ağda çalışır.',
     simge: <Server size={22} />,
     varliklar: [
-      { ad: 'Sezgi-Sunucu-win-x64.zip', etiket: 'Windows x64', not: 'Klasöre açın, Sezgi.Sunucu.exe’yi çalıştırın' },
-      { ad: 'Sezgi-Sunucu-linux-x64.tar.gz', etiket: 'Linux x64', not: 'systemd hizmeti olarak çalışabilir' },
-      { ad: 'Sezgi-Sunucu-linux-arm64.tar.gz', etiket: 'Linux ARM64', not: 'Raspberry Pi 4/5 ve ARM sunucular' },
+      { ad: 'Sentio-Sunucu-win-x64.zip', etiket: 'Windows x64', not: 'Klasöre açın, Sentio.Sunucu.exe’yi çalıştırın' },
+      { ad: 'Sentio-Sunucu-linux-x64.tar.gz', etiket: 'Linux x64', not: 'systemd hizmeti olarak çalışabilir' },
+      { ad: 'Sentio-Sunucu-linux-arm64.tar.gz', etiket: 'Linux ARM64', not: 'Raspberry Pi 4/5 ve ARM sunucular' },
     ],
   },
   {
-    ad: 'Sezgi Masaüstü',
+    ad: 'Sentio Masaüstü',
     rol: 'Öğrenci ve öğretmen bilgisayarlarına',
     aciklama: 'Sunucuya bağlanan uygulama. Arka planda çalışmayı sürdürür, destek bildirimlerini öne getirir, yerel ağda https olmadan da kamerayı açar ve galeri analizi için pencere seçtirir.',
     simge: <Laptop size={22} />,
     varliklar: [
-      { ad: 'Sezgi-Masaustu-Kurulum.exe', etiket: 'Windows kurulum', not: 'Kendini güncel tutar' },
-      { ad: 'Sezgi-Masaustu-Tasinabilir.exe', etiket: 'Windows taşınabilir', not: 'Kurulumsuz, tek dosya' },
-      { ad: 'Sezgi-Masaustu-mac-arm64.dmg', etiket: 'macOS, Apple Silicon', not: 'M1 ve sonrası işlemcili Mac’ler, macOS 13 ve üstü' },
-      { ad: 'Sezgi-Masaustu-mac-x64.dmg', etiket: 'macOS, Intel', not: 'Intel işlemcili Mac’ler, macOS 13 ve üstü' },
-      { ad: 'Sezgi-Masaustu-linux-x64.AppImage', etiket: 'Linux AppImage', not: 'Çalıştırılabilir yapıp açın; kendini güncel tutar' },
+      { ad: 'Sentio-Masaustu-Kurulum.exe', etiket: 'Windows kurulum', not: 'Kendini güncel tutar' },
+      { ad: 'Sentio-Masaustu-Tasinabilir.exe', etiket: 'Windows taşınabilir', not: 'Kurulumsuz, tek dosya' },
+      { ad: 'Sentio-Masaustu-mac-arm64.dmg', etiket: 'macOS, Apple Silicon', not: 'M1 ve sonrası işlemcili Mac’ler, macOS 13 ve üstü' },
+      { ad: 'Sentio-Masaustu-mac-x64.dmg', etiket: 'macOS, Intel', not: 'Intel işlemcili Mac’ler, macOS 13 ve üstü' },
+      { ad: 'Sentio-Masaustu-linux-x64.AppImage', etiket: 'Linux AppImage', not: 'Çalıştırılabilir yapıp açın; kendini güncel tutar' },
     ],
   },
 ];
@@ -167,7 +167,7 @@ export function Indirmeler() {
           </div>
           <p className="mt-4 leading-relaxed text-soluk">Sunucuyu kapsayıcıda çalıştırmak için depodaki Dockerfile hazır; veriler bir hacimde kalır.</p>
           <pre className="mt-3 overflow-x-auto rounded-xl bg-gece p-3 text-[13px] leading-relaxed text-metin/90">
-            <code>{`git clone ${DEPO}.git\ncd Sezgi && docker compose up -d`}</code>
+            <code>{`git clone ${DEPO}.git\ncd Sentio && docker compose up -d`}</code>
           </pre>
           <a href={DEPO} target="_blank" rel="noreferrer" className="mt-4 inline-flex font-semibold text-gunes hover:underline">
             GitHub deposu

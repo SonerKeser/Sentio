@@ -21,9 +21,9 @@ export function LogoIsareti({ boyut = 28 }: { boyut?: number }) {
 
 export function Logo({ hedef = '/', className }: { hedef?: string; className?: string }) {
   return (
-    <Link to={hedef} className={sinif('inline-flex items-center gap-2.5', className)} aria-label="Sezgi ana sayfa">
+    <Link to={hedef} className={sinif('inline-flex items-center gap-2.5', className)} aria-label="Sentio ana sayfa">
       <LogoIsareti />
-      <span className="baslik text-[22px] font-bold leading-none tracking-tight">Sezgi</span>
+      <span className="baslik text-[22px] font-bold leading-none tracking-tight">Sentio</span>
     </Link>
   );
 }

@@ -36,7 +36,7 @@ function yapilandirma(tur: MotorTuru): Partial<Config> {
 }
 
 /**
- * Analiz motorunu (TensorFlow.js + Human) ilk ihtiyaçta yükler. Modeller Sezgi sunucusundan gelir;
+ * Analiz motorunu (TensorFlow.js + Human) ilk ihtiyaçta yükler. Modeller Sentio sunucusundan gelir;
  * tüm çıkarım tarayıcıda, cihazın GPU'sunda yapılır ve görüntü hiçbir yere gönderilmez.
  */
 export function motorYukle(tur: MotorTuru): Promise<Human> {

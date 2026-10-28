@@ -8,9 +8,9 @@ TestResults/
 
 # Sunucu çalışma verisi ve derlenmiş web arayüzü.
 # Not: Windows'ta dosya adları büyük/küçük harf duyarsızdır; "veri/" kuralı kaynak klasörü "Veri/"yi de dışlar.
-src/Sezgi.Sunucu/wwwroot/
-src/Sezgi.Sunucu/gelistirme-verisi/
-src/Sezgi.Sunucu/indirmeler/
+src/Sentio.Sunucu/wwwroot/
+src/Sentio.Sunucu/gelistirme-verisi/
+src/Sentio.Sunucu/indirmeler/
 *.db
 *.db-shm
 *.db-wal

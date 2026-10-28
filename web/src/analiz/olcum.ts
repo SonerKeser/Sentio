@@ -15,7 +15,7 @@ type Nokta = readonly (number | undefined)[];
 const sinirla = (x: number, alt = 0, ust = 1) => Math.min(ust, Math.max(alt, x));
 const derece = (radyan: number) => (radyan * 180) / Math.PI;
 
-/** Human'ın ifade listesini Sezgi sırasında, toplamı 1 olan 7'li olasılık dizisine çevirir. */
+/** Human'ın ifade listesini Sentio sırasında, toplamı 1 olan 7'li olasılık dizisine çevirir. */
 export function olasiliklar(liste: readonly { score: number; emotion: string }[] | undefined): number[] {
   const d = new Array<number>(DUYGULAR.length).fill(0);
   for (const { score, emotion } of liste ?? []) {

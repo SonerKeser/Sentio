@@ -1,16 +1,16 @@
 services:
-  sezgi:
+  sentio:
     build: .
-    image: sezgi:yerel
+    image: sentio:yerel
     ports:
       - "5757:5757"
     volumes:
-      - sezgi-veri:/veri
+      - sentio-veri:/veri
     environment:
       # Öğrencilere gösterilecek adres; https ile yayınlıyorsanız buraya yazın.
-      # Sezgi__GenelAdres: "https://sezgi.okulunuz.edu.tr"
-      Sezgi__VeriSaklamaGun: "180"
+      # Sentio__GenelAdres: "https://sentio.okulunuz.edu.tr"
+      Sentio__VeriSaklamaGun: "180"
     restart: unless-stopped
 
 volumes:
-  sezgi-veri:
+  sentio-veri:
