@@ -41,8 +41,8 @@ const BILESENLER: Bilesen[] = [
     varliklar: [
       { ad: 'Sezgi-Masaustu-Kurulum.exe', etiket: 'Windows kurulum', not: 'Kendini güncel tutar' },
       { ad: 'Sezgi-Masaustu-Tasinabilir.exe', etiket: 'Windows taşınabilir', not: 'Kurulumsuz, tek dosya' },
-      { ad: 'Sezgi-Masaustu-mac-arm64.dmg', etiket: 'macOS, Apple Silicon', not: 'M1 ve sonrası işlemcili Mac’ler' },
-      { ad: 'Sezgi-Masaustu-mac-x64.dmg', etiket: 'macOS, Intel', not: 'Intel işlemcili Mac’ler' },
+      { ad: 'Sezgi-Masaustu-mac-arm64.dmg', etiket: 'macOS, Apple Silicon', not: 'M1 ve sonrası işlemcili Mac’ler, macOS 13 ve üstü' },
+      { ad: 'Sezgi-Masaustu-mac-x64.dmg', etiket: 'macOS, Intel', not: 'Intel işlemcili Mac’ler, macOS 13 ve üstü' },
       { ad: 'Sezgi-Masaustu-linux-x64.AppImage', etiket: 'Linux AppImage', not: 'Çalıştırılabilir yapıp açın; kendini güncel tutar' },
     ],
   },
