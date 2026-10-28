@@ -92,7 +92,9 @@ Electron 45. Arayüz sunucudan yüklenir; uygulama şunları ekler:
 - Destek bildiriminde pencereyi öne getirme ve ardından eski haline döndürme,
 - Galeri analizi için pencere seçici,
 - UDP 5758 duyurularıyla yerel ağdaki sunucuları bulma,
-- GitHub sürümlerinden kendini güncelleme (kurulum sürümü).
+- GitHub sürümlerinden kendini güncelleme (Windows kurulum sürümü ve Linux AppImage; macOS'ta kendini güncelleme Apple imzası gerektirdiğinden kapalıdır).
+
+Paketler Windows (NSIS kurulum ve taşınabilir), macOS (Apple Silicon ve Intel için ayrı dmg, ad-hoc imzalı) ve Linux (x64 AppImage) için `surum.yml` iş akışında üretilir ve yüklenmeden önce açılıp denenir. AppImage FUSE 2 gerektirmeyen yeni çalıştırıcıyla gelir; başlatıcı, kullanıcı ad alanlarının kısıtlandığı sistemlerde (Ubuntu 24.04) Chromium korumalı alanını kendisi kapatır, diğerlerinde açık bırakır.
 
 Güvenlik: `contextIsolation`, `sandbox`, `nodeIntegration: false`; sayfaya yalnızca dört işlevlik dar bir köprü açılır; izinler (kamera, ekran paylaşımı) yalnızca seçilen sunucu kökenine verilir, mikrofon hiç istenmez; sunucu dışındaki bağlantılar varsayılan tarayıcıda açılır.
 

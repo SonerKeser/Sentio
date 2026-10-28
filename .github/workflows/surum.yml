@@ -1,18 +1,24 @@
 name: Sürüm paketleri
 
-# Elle tetiklenir: tüm platformlar için sunucu ve masaüstü paketlerini üretip verilen sürüme yükler.
+# Elle tetiklenir: seçilen platformların paketlerini üretir, dener ve verilen sürüme yükler.
+# Seçilmeyen platformların sürümdeki dosyalarına dokunulmaz.
 on:
   workflow_dispatch:
     inputs:
       etiket:
         description: 'Sürüm etiketi (ör. v1.1.0). Sürüm yoksa taslak olarak oluşturulur.'
         required: true
+      platformlar:
+        description: 'Üretilecek paketler, boşlukla ayrılmış: sunucu windows linux mac'
+        required: true
+        default: 'sunucu windows linux mac'
 
 permissions:
   contents: write
 
 jobs:
   sunucu:
+    if: contains(inputs.platformlar, 'sunucu')
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -47,37 +53,108 @@ jobs:
 
   masaustu:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            hedef: --win --x64
+            platform: windows
+            hedef: --win
           - os: ubuntu-latest
-            hedef: --linux --x64
+            platform: linux
+            hedef: --linux
           - os: macos-latest
+            platform: mac
             hedef: --mac
     runs-on: ${{ matrix.os }}
+    env:
+      SECILDI: ${{ contains(inputs.platformlar, matrix.platform) }}
     steps:
       - uses: actions/checkout@v4
+        if: env.SECILDI == 'true'
       - uses: actions/setup-node@v4
+        if: env.SECILDI == 'true'
         with:
           node-version: 22
       - name: Paketle
+        if: env.SECILDI == 'true'
         working-directory: masaustu
+        shell: bash
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
           npm ci --no-audit --no-fund
           npm run simge
           npx electron-builder ${{ matrix.hedef }} --publish never
+
+      # AppImage hem kullanıcı ad alanlarının kısıtlı olduğu (Ubuntu 24.04 masaüstü) hem de açık olduğu
+      # sistemlerde açılmalı. Başlatıcı, korumalı alan kullanılamıyorsa onu kendisi kapatır.
+      - name: Paketi dene (Linux)
+        if: env.SECILDI == 'true' && matrix.platform == 'linux'
+        working-directory: masaustu/dist
+        run: |
+          command -v fusermount3 >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq fuse3)
+          chmod +x Sezgi-Masaustu-linux-x64.AppImage
+          dene() {
+            ( sleep 15; pgrep -af '\.mount_.*/sezgi' | head -1 > "$RUNNER_TEMP/surec.txt" ) &
+            set +e
+            timeout --kill-after=5 25 xvfb-run -a ./Sezgi-Masaustu-linux-x64.AppImage > "$RUNNER_TEMP/calisma.log" 2>&1
+            kod=$?
+            set -e
+            wait
+            pkill -f '\.mount_' || true
+            pkill Xvfb || true
+            sleep 2
+            cat "$RUNNER_TEMP/surec.txt"
+            echo "--- $1: çıkış kodu $kod"
+            if grep -q -- --no-sandbox "$RUNNER_TEMP/surec.txt"; then echo "korumalı alan: kapalı"; else echo "korumalı alan: açık"; fi
+            tail -15 "$RUNNER_TEMP/calisma.log"
+            # 124: süre dolduğunda uygulama hâlâ açıktı.
+            [ "$kod" -eq 124 ] && [ -s "$RUNNER_TEMP/surec.txt" ]
+          }
+          echo "apparmor_restrict_unprivileged_userns=$(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null || echo yok)"
+          dene "varsayılan sistem"
+          sudo sysctl -qw kernel.apparmor_restrict_unprivileged_userns=0 || true
+          dene "ad alanları açık"
+
+      - name: Paketi dene (macOS)
+        if: env.SECILDI == 'true' && matrix.platform == 'mac'
+        working-directory: masaustu/dist
+        run: |
+          for mimari in arm64 x64; do
+            nokta="/tmp/sezgi-$mimari"
+            hdiutil attach "Sezgi-Masaustu-mac-$mimari.dmg" -nobrowse -readonly -mountpoint "$nokta" >/dev/null
+            uygulama="$nokta/Sezgi.app"
+            echo "--- $mimari: $(lipo -archs "$uygulama/Contents/MacOS/Sezgi")"
+            [ "$(lipo -archs "$uygulama/Contents/MacOS/Sezgi")" = "$([ $mimari = x64 ] && echo x86_64 || echo arm64)" ]
+            codesign -dv "$uygulama" 2>&1 | grep -E '^(Identifier|Signature)'
+            codesign --verify --deep --strict "$uygulama"
+            /usr/libexec/PlistBuddy -c 'Print :NSCameraUsageDescription' "$uygulama/Contents/Info.plist"
+            echo "en düşük macOS: $(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$uygulama/Contents/Info.plist")"
+          done
+          "/tmp/sezgi-arm64/Sezgi.app/Contents/MacOS/Sezgi" > "$RUNNER_TEMP/calisma.log" 2>&1 &
+          pid=$!
+          sleep 20
+          tail -15 "$RUNNER_TEMP/calisma.log"
+          # Uygulama 20 sn sonra hâlâ açık olmalı.
+          kill -0 "$pid"
+          kill "$pid"
+          sleep 2
+          hdiutil detach /tmp/sezgi-arm64 >/dev/null
+          hdiutil detach /tmp/sezgi-x64 >/dev/null
+
       - uses: actions/upload-artifact@v4
+        if: env.SECILDI == 'true'
         with:
-          name: masaustu-${{ matrix.os }}
+          name: masaustu-${{ matrix.platform }}
           path: |
             masaustu/dist/Sezgi-Masaustu-*
             masaustu/dist/latest*.yml
+            !masaustu/dist/*.dmg.blockmap
+            !masaustu/dist/latest-mac.yml
 
   yukle:
     needs: [sunucu, masaustu]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -89,6 +166,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ETIKET: ${{ inputs.etiket }}
         run: |
+          ls -l paketler
           gh release view "$ETIKET" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
             gh release create "$ETIKET" --repo "$GITHUB_REPOSITORY" --draft --title "Sezgi $ETIKET" --notes "Sürüm notları eklenecek."
           gh release upload "$ETIKET" paketler/* --repo "$GITHUB_REPOSITORY" --clobber

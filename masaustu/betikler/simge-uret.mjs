@@ -19,6 +19,18 @@ const svg = (arkaPlan) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   </g>
 </svg>`;
 
+// macOS menü çubuğu "şablon" simgesi ister: tek renk siyah ve saydamlık; sistem açık/koyu temaya göre boyar.
+// Gözler ve ağız yüzden oyulur.
+const sablon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <mask id="m">
+    <path fill="#fff" d="M32 4c14 0 27 9 28 26 1 16-11 30-28 30S3 47 4 31C5 14 18 4 32 4Z"/>
+    <ellipse cx="23" cy="28" rx="3.6" ry="4.6" fill="#000"/>
+    <ellipse cx="41" cy="28" rx="3.6" ry="4.6" fill="#000"/>
+    <path d="M21 40c6 6 16 6 22 0" fill="none" stroke="#000" stroke-width="3.6" stroke-linecap="round"/>
+  </mask>
+  <rect width="64" height="64" fill="#000" mask="url(#m)"/>
+</svg>`;
+
 const yaz = (dosya, kaynak, boyut) => {
   const png = new Resvg(kaynak, { fitTo: { mode: 'width', value: boyut } }).render().asPng();
   writeFileSync(new URL(`../simge/${dosya}`, import.meta.url), png);
@@ -28,3 +40,5 @@ const yaz = (dosya, kaynak, boyut) => {
 yaz('simge.png', svg(true), 512);
 yaz('tepsi.png', svg(false), 32);
 yaz('tepsi@2x.png', svg(false), 64);
+yaz('tepsiTemplate.png', sablon, 18);
+yaz('tepsiTemplate@2x.png', sablon, 36);

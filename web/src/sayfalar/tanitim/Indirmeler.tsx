@@ -41,6 +41,9 @@ const BILESENLER: Bilesen[] = [
     varliklar: [
       { ad: 'Sezgi-Masaustu-Kurulum.exe', etiket: 'Windows kurulum', not: 'Kendini güncel tutar' },
       { ad: 'Sezgi-Masaustu-Tasinabilir.exe', etiket: 'Windows taşınabilir', not: 'Kurulumsuz, tek dosya' },
+      { ad: 'Sezgi-Masaustu-mac-arm64.dmg', etiket: 'macOS, Apple Silicon', not: 'M1 ve sonrası işlemcili Mac’ler' },
+      { ad: 'Sezgi-Masaustu-mac-x64.dmg', etiket: 'macOS, Intel', not: 'Intel işlemcili Mac’ler' },
+      { ad: 'Sezgi-Masaustu-linux-x64.AppImage', etiket: 'Linux AppImage', not: 'Çalıştırılabilir yapıp açın; kendini güncel tutar' },
     ],
   },
 ];
@@ -174,8 +177,8 @@ export function Indirmeler() {
 
       <p className={sinif('text-sm text-silik', !surum && 'invisible')}>
         Son sürüm {surum?.surum}
-        {surum?.tarih ? `, ${new Date(surum.tarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Windows SmartScreen imzasız uygulamalar için uyarı gösterebilir: “Ek bilgi” → “Yine de
-        çalıştır”.
+        {surum?.tarih ? `, ${new Date(surum.tarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Uygulamalar imzasızdır. Windows SmartScreen uyarısında “Ek bilgi” → “Yine de
+        çalıştır” deyin. macOS ilk açılışta uygulamayı engellerse Sistem Ayarları → Gizlilik ve Güvenlik → “Yine de Aç” deyin.
       </p>
     </div>
   );

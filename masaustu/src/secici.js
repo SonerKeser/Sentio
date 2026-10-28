@@ -1,6 +1,7 @@
 (async () => {
   const izgara = document.getElementById('izgara');
-  const kaynaklar = await window.sezgi.kaynaklar();
+  const { kaynaklar, izinGerekli } = await window.sezgi.kaynaklar();
+  document.getElementById('izin').hidden = !izinGerekli;
   if (kaynaklar.length === 0) {
     document.getElementById('yukleniyor').textContent = 'Paylaşılabilecek bir pencere bulunamadı.';
     return;

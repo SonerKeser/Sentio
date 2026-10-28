@@ -11,7 +11,7 @@
     "basla": "electron .",
     "simge": "node betikler/simge-uret.mjs",
     "paketle": "electron-builder --win --x64 --publish never",
-    "paketle:linux": "electron-builder --linux --x64 --publish never",
+    "paketle:linux": "electron-builder --linux --publish never",
     "paketle:mac": "electron-builder --mac --publish never"
   },
   "dependencies": {
@@ -64,21 +64,45 @@
     "portable": {
       "artifactName": "Sezgi-Masaustu-Tasinabilir.exe"
     },
+    "toolsets": {
+      "appimage": "1.0.3"
+    },
     "linux": {
       "target": [
-        "AppImage"
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "category": "Education",
       "icon": "simge/simge.png",
+      "executableName": "sezgi",
+      "synopsis": "Sınıf duygu ve dikkat analitiği istemcisi",
       "artifactName": "Sezgi-Masaustu-linux-x64.AppImage"
     },
     "mac": {
       "target": [
-        "dmg"
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
       ],
       "category": "public.app-category.education",
       "icon": "simge/simge.png",
-      "artifactName": "Sezgi-Masaustu-mac.dmg"
+      "identity": "-",
+      "hardenedRuntime": false,
+      "extendInfo": {
+        "NSCameraUsageDescription": "Sezgi, derse katıldığınızda yüz ifadenizi bu bilgisayarda çözümlemek için kamerayı kullanır. Görüntü kaydedilmez ve hiçbir yere gönderilmez."
+      },
+      "artifactName": "Sezgi-Masaustu-mac-${arch}.dmg"
+    },
+    "dmg": {
+      "title": "Sezgi"
     },
     "publish": [
       {

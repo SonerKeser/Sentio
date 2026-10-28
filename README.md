@@ -74,7 +74,7 @@ Bu proje, eski bir akademik denemenin ([EmotionDedect](docs/ESKI-SISTEM-ANALIZI.
 1. **Sunucuyu indirin:** [Windows](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Sunucu-win-x64.zip) · [Linux x64](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Sunucu-linux-x64.tar.gz) · [Linux ARM64](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Sunucu-linux-arm64.tar.gz) · [Docker](docs/KURULUM.md#docker)
 2. `Sezgi.Sunucu` dosyasını çalıştırın; `http://localhost:5757/panel` açılır. İlk yönetici hesabını oluşturun.
 3. **Yeni ders başlatın.** Öğrencilerle kodu ya da karekodu paylaşın.
-4. Öğrenciler `http://sunucu-adresi:5757/katil` sayfasından ya da [Sezgi Masaüstü](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-Kurulum.exe) ile katılır.
+4. Öğrenciler `http://sunucu-adresi:5757/katil` sayfasından ya da Sezgi Masaüstü uygulamasıyla ([Windows](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-Kurulum.exe) · [macOS](https://sonerkeser.github.io/Sezgi/#indir) · [Linux](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-linux-x64.AppImage)) katılır.
 
 Öğrenciniz yok mu? Dersi açın ve **Sanal sınıf** düğmesiyle 8–32 sanal öğrenci ekleyin.
 
@@ -86,7 +86,7 @@ Bu proje, eski bir akademik denemenin ([EmotionDedect](docs/ESKI-SISTEM-ANALIZI.
 | --- | --- | --- |
 | **Sunucu** | .NET 10, ASP.NET Core minimal API, SignalR, EF Core + SQLite, ClosedXML | [Windows x64](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Sunucu-win-x64.zip), [Linux x64](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Sunucu-linux-x64.tar.gz), [Linux ARM64](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Sunucu-linux-arm64.tar.gz) |
 | **Web istemcisi** (öğretmen paneli, öğrenci, tanıtım) | React 19, Vite 7, Tailwind CSS 4, Motion, Recharts, Human (TensorFlow.js) | Sunucuyla birlikte gelir |
-| **Masaüstü** (öğrenci ve öğretmen) | Electron 45 | [Kurulum](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-Kurulum.exe), [taşınabilir](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-Tasinabilir.exe) |
+| **Masaüstü** (öğrenci ve öğretmen) | Electron 45 | Windows [kurulum](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-Kurulum.exe), [taşınabilir](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-Tasinabilir.exe); macOS [Apple Silicon](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-mac-arm64.dmg), [Intel](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-mac-x64.dmg); Linux [AppImage](https://github.com/SonerKeser/Sezgi/releases/latest/download/Sezgi-Masaustu-linux-x64.AppImage) |
 
 ## Nasıl çalışır?
 

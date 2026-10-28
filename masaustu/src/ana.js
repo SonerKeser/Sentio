@@ -1,12 +1,13 @@
 // Sezgi masaüstü istemcisi: ana süreç.
 // Arayüzün kendisi Sezgi sunucusundan yüklenir; bu süreç pencereyi, sistem tepsisini, izinleri,
 // destek bildirimlerini, ekran seçiciyi ve yerel ağdaki sunucuların bulunmasını yönetir.
-const { app, BrowserWindow, Tray, Menu, ipcMain, session, desktopCapturer, shell, nativeImage, Notification, net } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, session, desktopCapturer, shell, nativeImage, Notification, net, systemPreferences } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const dgram = require('node:dgram');
 
 const DUYURU_PORTU = 5758;
+const MAC = process.platform === 'darwin';
 const ayarDosyasi = () => path.join(app.getPath('userData'), 'ayarlar.json');
 
 function ayarlariOku() {
@@ -100,7 +101,6 @@ function pencereOlustur() {
       spellcheck: false,
     },
   });
-  Menu.setApplicationMenu(null);
   pencere.once('ready-to-show', () => pencere.show());
 
   // Sunucu dışındaki bağlantılar (ör. GitHub) varsayılan tarayıcıda açılır; uygulama içinde başka siteye gidilmez.
@@ -127,7 +127,8 @@ function pencereOlustur() {
     pencere.hide();
     if (!tepsiBilgisiGosterildi && Notification.isSupported()) {
       tepsiBilgisiGosterildi = true;
-      new Notification({ title: 'Sezgi çalışmaya devam ediyor', body: 'Ders sürerken arka planda kalır. Kapatmak için sistem tepsisindeki simgeyi kullanın.', icon: simgeYolu('simge.png') }).show();
+      const yer = MAC ? 'menü çubuğundaki' : 'sistem tepsisindeki';
+      new Notification({ title: 'Sezgi çalışmaya devam ediyor', body: `Ders sürerken arka planda kalır. Kapatmak için ${yer} simgeyi kullanın.`, icon: simgeYolu('simge.png') }).show();
     }
   });
 
@@ -135,8 +136,46 @@ function pencereOlustur() {
   else baglantiSayfasiniAc();
 }
 
+/** macOS'ta uygulama menüsü olmadan kopyala/yapıştır kısayolları da çalışmaz; diğer sistemlerde menü yoktur. */
+function macMenusu() {
+  return Menu.buildFromTemplate([
+    {
+      label: 'Sezgi',
+      submenu: [
+        { role: 'about', label: 'Sezgi hakkında' },
+        { type: 'separator' },
+        { role: 'hide', label: 'Sezgi’yi gizle' },
+        { role: 'hideOthers', label: 'Diğerlerini gizle' },
+        { role: 'unhide', label: 'Tümünü göster' },
+        { type: 'separator' },
+        { role: 'quit', label: 'Sezgi’den çık' },
+      ],
+    },
+    {
+      label: 'Düzen',
+      submenu: [
+        { role: 'undo', label: 'Geri al' },
+        { role: 'redo', label: 'Yinele' },
+        { type: 'separator' },
+        { role: 'cut', label: 'Kes' },
+        { role: 'copy', label: 'Kopyala' },
+        { role: 'paste', label: 'Yapıştır' },
+        { role: 'selectAll', label: 'Tümünü seç' },
+      ],
+    },
+    {
+      label: 'Pencere',
+      submenu: [
+        { role: 'minimize', label: 'Küçült' },
+        { role: 'close', label: 'Kapat' },
+      ],
+    },
+  ]);
+}
+
 function tepsiOlustur() {
-  tepsi = new Tray(nativeImage.createFromPath(simgeYolu('tepsi.png')));
+  // macOS menü çubuğu tek renkli şablon simge ister; @2x sürümü kendiliğinden seçilir.
+  tepsi = new Tray(nativeImage.createFromPath(simgeYolu(MAC ? 'tepsiTemplate.png' : 'tepsi.png')));
   tepsi.setToolTip('Sezgi');
   const menu = () =>
     Menu.buildFromTemplate([
@@ -163,6 +202,8 @@ function izinleriAyarla() {
     if (!sunucuKokenindenMi(koken) || !izinli.has(izin)) return karar(false);
     // Mikrofon hiçbir zaman istenmez; yalnızca görüntü.
     if (izin === 'media' && ayrinti?.mediaTypes?.includes('audio')) return karar(false);
+    // macOS kamerayı ayrıca uygulama düzeyinde sorar; reddedilirse sayfa "izin verilmedi" hatası alır.
+    if (izin === 'media' && MAC) return systemPreferences.askForMediaAccess('camera').then(karar, () => karar(false));
     karar(true);
   });
   session.defaultSession.setPermissionCheckHandler((_wc, izin, koken) => sunucuKokenindenMi(koken) && izinli.has(izin));
@@ -236,11 +277,16 @@ function ipcKaydet() {
   });
 
   ipcMain.handle('secici:kaynaklar', async (olay) => {
-    if (!yereldenMi(olay)) return [];
+    if (!yereldenMi(olay)) return { kaynaklar: [] };
+    // macOS'ta ekran kaydı izni yokken pencereler içeriksiz listelenir; ilk istekte sistem izni sorar.
+    const izinGerekli = MAC && systemPreferences.getMediaAccessStatus('screen') !== 'granted';
     const kaynaklar = await desktopCapturer.getSources({ types: ['window', 'screen'], thumbnailSize: { width: 320, height: 200 }, fetchWindowIcons: true });
-    return kaynaklar
-      .filter((k) => !k.name.startsWith('Sezgi'))
-      .map((k) => ({ id: k.id, ad: k.name, ekran: k.id.startsWith('screen:'), resim: k.thumbnail.toDataURL(), simge: k.appIcon?.toDataURL() ?? null }));
+    return {
+      izinGerekli,
+      kaynaklar: kaynaklar
+        .filter((k) => !k.name.startsWith('Sezgi'))
+        .map((k) => ({ id: k.id, ad: k.name, ekran: k.id.startsWith('screen:'), resim: k.thumbnail.toDataURL(), simge: k.appIcon?.toDataURL() ?? null })),
+    };
   });
 
   ipcMain.handle('secici:sec', async (olay, id) => {
@@ -307,8 +353,10 @@ function sunuculariDinle() {
 }
 
 async function guncellemeleriDenetle() {
-  // Taşınabilir sürüm kendini güncelleyemez; kurulum sürümü GitHub sürümlerinden günceller.
-  if (!app.isPackaged || process.env.PORTABLE_EXECUTABLE_DIR) return;
+  // Windows kurulum sürümü ve Linux AppImage GitHub sürümlerinden kendini günceller. Taşınabilir sürüm
+  // güncelleyemez; macOS'ta kendini güncelleme Apple imzası ister, yeni sürüm indirme sayfasından alınır.
+  if (!app.isPackaged || process.env.PORTABLE_EXECUTABLE_DIR || MAC) return;
+  if (process.platform === 'linux' && !process.env.APPIMAGE) return;
   try {
     const { autoUpdater } = require('electron-updater');
     autoUpdater.autoDownload = true;
@@ -319,11 +367,14 @@ async function guncellemeleriDenetle() {
 }
 
 app.on('second-instance', goster);
+// macOS: pencere gizliyken Dock simgesine tıklamak onu geri getirir.
+app.on('activate', goster);
 app.on('before-quit', () => (cikiliyor = true));
 app.on('window-all-closed', () => app.quit());
 
 app.whenReady().then(() => {
   app.setAppUserModelId('com.sonerkeser.sezgi');
+  Menu.setApplicationMenu(MAC ? macMenusu() : null);
   izinleriAyarla();
   ipcKaydet();
   pencereOlustur();

@@ -106,7 +106,7 @@ function Kahraman() {
         </motion.div>
         <motion.ul {...giris(0.32)} className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-silik">
           <li>Açık kaynak, MIT lisansı</li>
-          <li>Windows, Linux, Docker</li>
+          <li>Windows, macOS, Linux, Docker</li>
           <li>İnternetsiz yerel ağda çalışır</li>
         </motion.ul>
       </div>
